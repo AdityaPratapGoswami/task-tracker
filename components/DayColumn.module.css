@@ -1,0 +1,51 @@
+.column {
+    background: var(--color-white);
+    border-radius: var(--radius-lg);
+    display: flex;
+    flex-direction: column;
+    /* height: 100%;  Removed to fit content */
+    /* min-height: 400px; Removed to fit content */
+    box-shadow: var(--shadow-md);
+    border: 1px solid black;
+    height: fit-content;
+    /* Ensure it fits content */
+}
+
+.header {
+    padding: 0.75rem 1rem;
+    background-color: var(--color-bg-grid);
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+.dayName {
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--color-text-main);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.date {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+    font-weight: 500;
+}
+
+.content {
+    padding: 1rem;
+    /* flex: 1; Removed to prevent expansion */
+    padding-bottom: 2rem;
+    /* Add some bottom padding for visual balance */
+}
+
+.emptyState {
+    color: var(--color-text-muted);
+    text-align: center;
+    margin-top: 2rem;
+    font-size: 0.9rem;
+    font-style: italic;
+}

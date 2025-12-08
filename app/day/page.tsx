@@ -17,6 +17,7 @@ export default function DayView() {
 
     // Gratitude State
     const [gratitude, setGratitude] = useState('');
+    const [gratitudeError, setGratitudeError] = useState('');
     const [isSavingGratitude, setIsSavingGratitude] = useState(false);
 
     // Journal State
@@ -87,13 +88,21 @@ export default function DayView() {
         setIsSavingGratitude(true);
         try {
             const todayStr = format(new Date(), 'yyyy-MM-dd');
-            await fetch('/api/gratitude', {
+            const res = await fetch('/api/gratitude', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ date: todayStr, content: gratitude }),
             });
-        } catch (error) {
+            if (!res.ok) {
+                const err = await res.json();
+                console.error(`Save failed: ${err.error || res.statusText}`);
+                setGratitudeError(`Save failed: ${err.error || res.statusText}`);
+            } else {
+                setGratitudeError('');
+            }
+        } catch (error: any) {
             console.error('Failed to save gratitude', error);
+            setGratitudeError(`Exception: ${error.message}`);
         } finally {
             setIsSavingGratitude(false);
         }
@@ -313,6 +322,7 @@ export default function DayView() {
                             <div style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: 'var(--color-text-muted)', textAlign: 'right' }}>
                                 {isSavingGratitude ? 'Saving...' : 'Don\'t forget to save!'}
                             </div>
+                            {gratitudeError && <div style={{ color: 'red', marginTop: '0.5rem' }}>{gratitudeError}</div>}
                         </div>
                     </div>
 

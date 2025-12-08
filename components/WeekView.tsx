@@ -8,6 +8,7 @@ import DayColumn from './DayColumn';
 import AddTaskModal from './AddTaskModal';
 import { Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 import styles from './WeekView.module.css';
+import { useAuth } from '@/context/AuthContext';
 
 import WeekSummary from './WeekSummary';
 import { IGratitude } from '@/models/Gratitude';
@@ -19,6 +20,8 @@ export default function WeekView() {
     const [journals, setJournals] = useState<IJournal[]>([]);
     const [loading, setLoading] = useState(true);
     const [currentDate, setCurrentDate] = useState<Date | null>(null);
+    // const { logout } = useAuth(); // Moved to ProfilePage
+    // const { logout } = useAuth(); // Moved to ProfilePage
 
     useEffect(() => {
         setCurrentDate(new Date());
@@ -186,6 +189,7 @@ export default function WeekView() {
                         <Plus size={18} style={{ marginRight: '0.5rem' }} />
                         Add Task
                     </button>
+                    {/* Logout moved to Profile page */}
                 </div>
             </div>
 

@@ -1,24 +1,41 @@
 import { NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/db';
-import Task from '@/models/Task';
+import Task, { ITaskDocument } from '@/models/Task';
 import { format, subDays } from 'date-fns';
+import { verifyToken } from '@/lib/auth';
+import { cookies } from 'next/headers';
 
 export async function PATCH(
     request: Request,
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const cookieStore = await cookies();
+        const token = cookieStore.get('token')?.value;
+
+        if (!token) {
+            return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+        }
+
+        const payload = verifyToken(token);
+        if (!payload) {
+            return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+        }
+
         const { id } = await params;
         const body = await request.json();
         await connectToDatabase();
+
+        // Ensure user owns the task
+        const task = await Task.findOne({ _id: id, userId: payload.userId });
+        if (!task) {
+            return NextResponse.json({ error: 'Task not found' }, { status: 404 });
+        }
 
         let updateData = body;
 
         // If toggling a regular task for a specific date
         if (body.toggleDate) {
-            const task = await Task.findById(id);
-            if (!task) return NextResponse.json({ error: 'Task not found' }, { status: 404 });
-
             if (task.type === 'regular') {
                 const date = body.toggleDate;
                 const isCompleted = body.isCompleted;
@@ -31,14 +48,15 @@ export async function PATCH(
             }
         }
 
-        const updatedTask = await Task.findByIdAndUpdate(id, updateData, { new: true });
-
-        if (!updatedTask) {
-            return NextResponse.json({ error: 'Task not found' }, { status: 404 });
-        }
+        const updatedTask = await Task.findOneAndUpdate(
+            { _id: id, userId: payload.userId },
+            updateData,
+            { new: true }
+        );
 
         return NextResponse.json(updatedTask);
     } catch (error) {
+        console.error('Error in PATCH /api/tasks/[id]:', error);
         return NextResponse.json({ error: 'Failed to update task' }, { status: 500 });
     }
 }
@@ -48,13 +66,25 @@ export async function DELETE(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const cookieStore = await cookies();
+        const token = cookieStore.get('token')?.value;
+
+        if (!token) {
+            return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+        }
+
+        const payload = verifyToken(token);
+        if (!payload) {
+            return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+        }
+
         const { id } = await params;
         const { searchParams } = new URL(request.url);
         const dateParam = searchParams.get('date');
 
         await connectToDatabase();
 
-        const task = await Task.findById(id);
+        const task: ITaskDocument | null = await Task.findOne({ _id: id, userId: payload.userId });
 
         if (!task) {
             return NextResponse.json({ error: 'Task not found' }, { status: 404 });
@@ -66,8 +96,8 @@ export async function DELETE(
             // This means it will stop appearing from 'dateParam' onwards
             const endDate = format(subDays(new Date(dateParam), 1), 'yyyy-MM-dd');
 
-            const updatedTask = await Task.findByIdAndUpdate(
-                id,
+            const updatedTask = await Task.findOneAndUpdate(
+                { _id: id, userId: payload.userId },
                 { endDate },
                 { new: true }
             );
@@ -76,10 +106,11 @@ export async function DELETE(
         }
 
         // For spontaneous tasks or if no date provided, hard delete
-        await Task.findByIdAndDelete(id);
+        await Task.findOneAndDelete({ _id: id, userId: payload.userId });
 
         return NextResponse.json({ message: 'Task deleted' });
     } catch (error) {
+        console.error('Error in DELETE /api/tasks/[id]:', error);
         return NextResponse.json({ error: 'Failed to delete task' }, { status: 500 });
     }
 }

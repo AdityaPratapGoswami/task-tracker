@@ -93,6 +93,7 @@
 
 /* Text Columns (Gratitude/Journal) */
 .textCell {
+    width: 30%;
     max-width: 300px;
 }
 

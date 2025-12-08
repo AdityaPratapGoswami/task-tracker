@@ -3,17 +3,17 @@
 import { useState, useEffect } from 'react';
 import styles from './page.module.css';
 import { ITask } from '@/models/Task';
-import { User, Calendar, Zap, Trash2, Plus, ChevronDown } from 'lucide-react';
+import { User, Calendar, Zap, Trash2, Plus, ChevronDown, LogOut } from 'lucide-react';
 import AddTaskModal from '@/components/AddTaskModal';
 import { format } from 'date-fns';
 import Link from 'next/link';
 
+import { useAuth } from '@/context/AuthContext';
+
 export default function ProfilePage() {
+    const { user, logout } = useAuth();
     const [regularTasks, setRegularTasks] = useState<ITask[]>([]);
     const [spontaneousTasks, setSpontaneousTasks] = useState<ITask[]>([]);
-    const [name, setName] = useState('');
-    const [savedName, setSavedName] = useState('');
-    const [isSaving, setIsSaving] = useState(false);
     const [isRegularModalOpen, setIsRegularModalOpen] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState<string>(''); // For adding tasks to specific category
     const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
@@ -21,39 +21,7 @@ export default function ProfilePage() {
 
     useEffect(() => {
         fetchTasks();
-        fetchProfile();
     }, []);
-
-    const fetchProfile = async () => {
-        try {
-            const res = await fetch('/api/profile');
-            if (res.ok) {
-                const data = await res.json();
-                if (data.name) {
-                    setName(data.name);
-                    setSavedName(data.name);
-                }
-            }
-        } catch (error) {
-            console.error('Failed to fetch profile', error);
-        }
-    };
-
-    const handleSaveProfile = async () => {
-        setIsSaving(true);
-        try {
-            await fetch('/api/profile', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name }),
-            });
-            setSavedName(name);
-        } catch (error) {
-            console.error('Failed to save profile', error);
-        } finally {
-            setIsSaving(false);
-        }
-    };
 
     const fetchTasks = async () => {
         try {
@@ -150,28 +118,38 @@ export default function ProfilePage() {
                     <User size={24} />
                     Profile Details
                 </div>
-                <div className={styles.formGroup}>
-                    <label className={styles.label}>Name</label>
-                    <div style={{ display: 'flex', gap: '1rem' }}>
-                        <input
-                            type="text"
-                            className={styles.input}
-                            placeholder="Your Name"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            style={{ marginBottom: 0 }}
-                        />
-                        {name !== savedName && (
-                            <button
-                                className="btn"
-                                onClick={handleSaveProfile}
-                                disabled={isSaving}
-                                style={{ width: '100px', backgroundColor: 'var(--color-grey-300)' }}
-                            >
-                                {isSaving ? 'Saving...' : 'Save'}
-                            </button>
-                        )}
+                {user && (
+                    <div style={{ display: 'grid', gap: '1rem' }}>
+                        <div className={styles.formGroup}>
+                            <label className={styles.label}>Name</label>
+                            <div className={styles.input} style={{ backgroundColor: '#f8fafc', color: '#64748b' }}>
+                                {user.name}
+                            </div>
+                        </div>
+                        <div className={styles.formGroup}>
+                            <label className={styles.label}>Email</label>
+                            <div className={styles.input} style={{ backgroundColor: '#f8fafc', color: '#64748b' }}>
+                                {user.email}
+                            </div>
+                        </div>
                     </div>
+                )}
+
+                <div style={{ marginTop: '1.5rem', borderTop: '1px solid #e2e8f0', paddingTop: '1rem' }}>
+                    <button
+                        className="btn"
+                        onClick={logout}
+                        style={{
+                            width: '100%',
+                            backgroundColor: '#fee2e2',
+                            color: '#dc2626',
+                            justifyContent: 'center',
+                            fontWeight: 600
+                        }}
+                    >
+                        <LogOut size={18} style={{ marginRight: '0.5rem' }} />
+                        Log Out
+                    </button>
                 </div>
             </div>
 
@@ -318,6 +296,6 @@ export default function ProfilePage() {
                 onClose={() => setIsSpontaneousModalOpen(false)}
                 onAdd={handleAddSpontaneousTask}
             />
-        </div>
+        </div >
     );
 }

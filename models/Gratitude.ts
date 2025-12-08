@@ -1,12 +1,14 @@
 import mongoose, { Schema, Document, model } from 'mongoose';
 
 export interface IGratitude extends Document {
+    userId: string;
     date: string;
     content: string;
 }
 
 const GratitudeSchema = new Schema<IGratitude>(
     {
+        userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
         date: { type: String, required: true, index: true },
         content: { type: String, default: '' },
     },
@@ -14,6 +16,9 @@ const GratitudeSchema = new Schema<IGratitude>(
 );
 
 // Prevent re-compilation of model
+if (mongoose.models.Gratitude && !mongoose.models.Gratitude.schema.paths.userId) {
+    delete mongoose.models.Gratitude;
+}
 const Gratitude = mongoose.models.Gratitude || model<IGratitude>('Gratitude', GratitudeSchema);
 
 export default Gratitude;

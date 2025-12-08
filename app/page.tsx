@@ -2,7 +2,7 @@ import WeekView from '@/components/WeekView';
 
 export default function Home() {
   return (
-    <main className="container">
+    <main>
       <WeekView />
     </main>
   );

@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { ITask } from '@/models/Task';
 import DayColumn from '@/components/DayColumn';
 import AddTaskModal from '@/components/AddTaskModal';
-import { Plus, Save } from 'lucide-react';
+import { Plus, Save, User } from 'lucide-react';
 import styles from '@/components/WeekView.module.css'; // Reusing WeekView styles
 
 export default function DayView() {
@@ -186,109 +186,175 @@ export default function DayView() {
     };
 
     return (
-        <div className="container">
-            <div className={styles.header}>
-                <h1 className={styles.title}>Day View</h1>
-                <div className={styles.actions}>
-                    <Link href="/" className="btn">
-                        Week View
-                    </Link>
-                    <Link href="/profile" className="btn">
-                        Profile
-                    </Link>
-                    <Link href="/analytics" className="btn">
-                        Analytics
-                    </Link>
-                    <button className="btn" onClick={() => setIsModalOpen(true)}>
-                        <Plus size={18} style={{ marginRight: '0.5rem' }} />
-                        Add Task
-                    </button>
+        <div className={styles.container}>
+            <div className={styles.contentWrapper}>
+                <div className={styles.header}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        <h1 className={styles.title}>Day View</h1>
+                        <button
+                            onClick={() => setIsModalOpen(true)}
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                background: 'var(--color-white)',
+                                padding: '0.5rem',
+                                borderRadius: '50%', // Circular button
+                                boxShadow: 'var(--shadow-sm)',
+                                border: '1px solid black',
+                                cursor: 'pointer',
+                                color: 'var(--color-text-main)'
+                            }}
+                            title="Add Task"
+                        >
+                            <Plus size={20} />
+                        </button>
+                    </div>
+                    <div className={styles.actions}>
+                        <Link href="/" className="btn">
+                            Week View
+                        </Link>
+                        <Link href="/analytics" className="btn">
+                            Analytics
+                        </Link>
+                        <Link href="/profile" className="btn" title="Profile">
+                            <User size={18} />
+                        </Link>
+                    </div>
                 </div>
-            </div>
 
-            <AddTaskModal
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                onAdd={handleAddTask}
-            />
+                <AddTaskModal
+                    isOpen={isModalOpen}
+                    onClose={() => setIsModalOpen(false)}
+                    onAdd={handleAddTask}
+                />
 
-            {loading || !currentDate ? (
-                <div className={styles.card} style={{ height: '300px', animation: 'pulse 1.5s infinite', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <div style={{ color: 'var(--color-text-muted)' }}>Loading...</div>
-                </div>
-            ) : (
-                <>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+                {loading || !currentDate ? (
+                    <div className={styles.card} style={{ height: '300px', animation: 'pulse 1.5s infinite', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <div style={{ color: 'var(--color-text-muted)' }}>Loading...</div>
+                    </div>
+                ) : (
+                    <>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
 
-                        {/* Left Column: Progress & Tasks */}
-                        <div style={{ display: 'flex', flexDirection: 'column' }}>
-                            {/* Progress Section */}
-                            <div className={styles.card} style={{ marginBottom: '2rem', padding: '1.5rem', background: 'white', borderRadius: '0.75rem', boxShadow: 'var(--shadow-md)', border: '1px solid black' }}>
-                                {(() => {
-                                    const total = tasks.length;
-                                    const completed = tasks.filter(t => t.isCompleted).length;
-                                    const percentage = total === 0 ? 0 : Math.round((completed / total) * 100);
+                            {/* Left Column: Progress & Tasks */}
+                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                {/* Progress Section */}
+                                <div className={styles.card} style={{ marginBottom: '2rem', padding: '1.5rem', background: 'white', borderRadius: '0.75rem', boxShadow: 'var(--shadow-md)', border: '1px solid black' }}>
+                                    {(() => {
+                                        const total = tasks.length;
+                                        const completed = tasks.filter(t => t.isCompleted).length;
+                                        const percentage = total === 0 ? 0 : Math.round((completed / total) * 100);
 
-                                    let progressColor = '#EF4444'; // Red (< 33%)
-                                    if (percentage >= 33 && percentage <= 66) {
-                                        progressColor = '#F59E0B'; // Yellow
-                                    } else if (percentage > 66) {
-                                        progressColor = '#10B981'; // Green
-                                    }
+                                        let progressColor = '#EF4444'; // Red (< 33%)
+                                        if (percentage >= 33 && percentage <= 66) {
+                                            progressColor = '#F59E0B'; // Yellow
+                                        } else if (percentage > 66) {
+                                            progressColor = '#10B981'; // Green
+                                        }
 
-                                    return (
-                                        <>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                                                <div>
-                                                    <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--color-text-main)', marginBottom: '0.25rem' }}>Today's Progress</h3>
-                                                    <div style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>
-                                                        {completed} of {total} tasks completed
+                                        return (
+                                            <>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                                                    <div>
+                                                        <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--color-text-main)', marginBottom: '0.25rem' }}>Today's Progress</h3>
+                                                        <div style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>
+                                                            {completed} of {total} tasks completed
+                                                        </div>
+                                                    </div>
+                                                    <div style={{ textAlign: 'right' }}>
+                                                        <div style={{ fontSize: '1.5rem', fontWeight: 800, color: progressColor }}>
+                                                            {percentage}%
+                                                        </div>
+                                                        <div style={{ color: 'var(--color-text-muted)', fontSize: '0.8rem' }}>
+                                                            {total - completed} remaining
+                                                        </div>
                                                     </div>
                                                 </div>
-                                                <div style={{ textAlign: 'right' }}>
-                                                    <div style={{ fontSize: '1.5rem', fontWeight: 800, color: progressColor }}>
-                                                        {percentage}%
-                                                    </div>
-                                                    <div style={{ color: 'var(--color-text-muted)', fontSize: '0.8rem' }}>
-                                                        {total - completed} remaining
-                                                    </div>
-                                                </div>
-                                            </div>
 
-                                            <div style={{ height: '10px', width: '100%', background: '#F3F4F6', borderRadius: '5px', overflow: 'hidden' }}>
-                                                <div style={{
-                                                    height: '100%',
-                                                    width: `${percentage}%`,
-                                                    background: progressColor,
-                                                    transition: 'width 0.5s ease',
-                                                    borderRadius: '5px'
-                                                }}></div>
-                                            </div>
-                                        </>
-                                    );
-                                })()}
+                                                <div style={{ height: '10px', width: '100%', background: '#F3F4F6', borderRadius: '5px', overflow: 'hidden' }}>
+                                                    <div style={{
+                                                        height: '100%',
+                                                        width: `${percentage}%`,
+                                                        background: progressColor,
+                                                        transition: 'width 0.5s ease',
+                                                        borderRadius: '5px'
+                                                    }}></div>
+                                                </div>
+                                            </>
+                                        );
+                                    })()}
+                                </div>
+
+                                <DayColumn
+                                    date={currentDate}
+                                    tasks={tasks}
+                                    onToggleTask={handleToggleTask}
+                                    style={{ flex: 1 }}
+                                />
                             </div>
 
-                            <DayColumn
-                                date={currentDate}
-                                tasks={tasks}
-                                onToggleTask={handleToggleTask}
-                                style={{ flex: 1 }}
-                            />
+                            {/* Right Column: Gratitude */}
+                            <div className={styles.card} style={{ background: 'white', padding: '1.5rem', borderRadius: '0.75rem', boxShadow: 'var(--shadow-md)', border: '1px solid black', display: 'flex', flexDirection: 'column' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                    <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--color-text-main)' }}>Today's Gratitude</h3>
+                                    <button
+                                        onClick={saveGratitude}
+                                        disabled={isSavingGratitude}
+                                        style={{
+                                            background: 'none',
+                                            border: 'none',
+                                            cursor: isSavingGratitude ? 'not-allowed' : 'pointer',
+                                            color: isSavingGratitude ? 'var(--color-text-muted)' : 'var(--color-palette-bright)',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '0.5rem',
+                                            fontWeight: 600,
+                                            fontSize: '1rem'
+                                        }}
+                                    >
+                                        <Save size={20} />
+                                        Save
+                                    </button>
+                                </div>
+                                <textarea
+                                    value={gratitude}
+                                    onChange={(e) => setGratitude(e.target.value)}
+                                    placeholder="What are you grateful for today?..."
+                                    style={{
+                                        width: '100%',
+                                        flex: 1, // Allow to grow
+                                        minHeight: '300px',
+                                        padding: '1rem',
+                                        border: '1px solid #e2e8f0',
+                                        borderRadius: '0.5rem',
+                                        resize: 'none',
+                                        fontSize: '1rem',
+                                        lineHeight: '1.6',
+                                        outline: 'none',
+                                        fontFamily: 'inherit',
+                                        color: 'var(--color-text-main)'
+                                    }}
+                                />
+                                <div style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: 'var(--color-text-muted)', textAlign: 'right' }}>
+                                    {isSavingGratitude ? 'Saving...' : 'Don\'t forget to save!'}
+                                </div>
+                                {gratitudeError && <div style={{ color: 'red', marginTop: '0.5rem' }}>{gratitudeError}</div>}
+                            </div>
                         </div>
 
-                        {/* Right Column: Gratitude */}
-                        <div className={styles.card} style={{ background: 'white', padding: '1.5rem', borderRadius: '0.75rem', boxShadow: 'var(--shadow-md)', border: '1px solid black', display: 'flex', flexDirection: 'column' }}>
+                        {/* Journal Section */}
+                        <div className={styles.card} style={{ background: 'white', padding: '1.5rem', borderRadius: '0.75rem', boxShadow: 'var(--shadow-md)', border: '1px solid black', marginTop: '2rem', display: 'flex', flexDirection: 'column' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--color-text-main)' }}>Today's Gratitude</h3>
+                                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--color-text-main)' }}>Daily Journal</h3>
                                 <button
-                                    onClick={saveGratitude}
-                                    disabled={isSavingGratitude}
+                                    onClick={saveJournal}
+                                    disabled={isSavingJournal}
                                     style={{
                                         background: 'none',
                                         border: 'none',
-                                        cursor: isSavingGratitude ? 'not-allowed' : 'pointer',
-                                        color: isSavingGratitude ? 'var(--color-text-muted)' : 'var(--color-palette-bright)',
+                                        cursor: isSavingJournal ? 'not-allowed' : 'pointer',
+                                        color: isSavingJournal ? 'var(--color-text-muted)' : 'var(--color-palette-bright)',
                                         display: 'flex',
                                         alignItems: 'center',
                                         gap: '0.5rem',
@@ -301,78 +367,30 @@ export default function DayView() {
                                 </button>
                             </div>
                             <textarea
-                                value={gratitude}
-                                onChange={(e) => setGratitude(e.target.value)}
-                                placeholder="What are you grateful for today?..."
+                                value={journal}
+                                onChange={(e) => setJournal(e.target.value)}
+                                placeholder="Reflect on your day..."
                                 style={{
                                     width: '100%',
-                                    flex: 1, // Allow to grow
-                                    minHeight: '300px',
+                                    minHeight: '200px',
                                     padding: '1rem',
                                     border: '1px solid #e2e8f0',
                                     borderRadius: '0.5rem',
-                                    resize: 'none',
+                                    resize: 'vertical',
                                     fontSize: '1rem',
                                     lineHeight: '1.6',
                                     outline: 'none',
                                     fontFamily: 'inherit',
                                     color: 'var(--color-text-main)'
                                 }}
-                            />
+                            ></textarea>
                             <div style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: 'var(--color-text-muted)', textAlign: 'right' }}>
-                                {isSavingGratitude ? 'Saving...' : 'Don\'t forget to save!'}
+                                {isSavingJournal ? 'Saving...' : 'Don\'t forget to save!'}
                             </div>
-                            {gratitudeError && <div style={{ color: 'red', marginTop: '0.5rem' }}>{gratitudeError}</div>}
                         </div>
-                    </div>
-
-                    {/* Journal Section */}
-                    <div className={styles.card} style={{ background: 'white', padding: '1.5rem', borderRadius: '0.75rem', boxShadow: 'var(--shadow-md)', border: '1px solid black', marginTop: '2rem', display: 'flex', flexDirection: 'column' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                            <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--color-text-main)' }}>Daily Journal</h3>
-                            <button
-                                onClick={saveJournal}
-                                disabled={isSavingJournal}
-                                style={{
-                                    background: 'none',
-                                    border: 'none',
-                                    cursor: isSavingJournal ? 'not-allowed' : 'pointer',
-                                    color: isSavingJournal ? 'var(--color-text-muted)' : 'var(--color-palette-bright)',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '0.5rem',
-                                    fontWeight: 600,
-                                    fontSize: '1rem'
-                                }}
-                            >
-                                <Save size={20} />
-                                Save
-                            </button>
-                        </div>
-                        <textarea
-                            value={journal}
-                            onChange={(e) => setJournal(e.target.value)}
-                            placeholder="Reflect on your day..."
-                            style={{
-                                width: '100%',
-                                minHeight: '200px',
-                                padding: '1rem',
-                                border: '1px solid #e2e8f0',
-                                borderRadius: '0.5rem',
-                                resize: 'vertical',
-                                fontSize: '1rem',
-                                lineHeight: '1.6',
-                                outline: 'none',
-                                fontFamily: 'inherit',
-                                color: 'var(--color-text-main)'
-                            }}
-                        ></textarea>
-                        <div style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: 'var(--color-text-muted)', textAlign: 'right' }}>
-                            {isSavingJournal ? 'Saving...' : 'Don\'t forget to save!'}
-                        </div>
-                    </div>
-                </>
-            )}
+                    </>
+                )}
+            </div>
         </div>
     );
 }

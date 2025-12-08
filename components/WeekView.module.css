@@ -2,12 +2,24 @@
     padding-bottom: 2rem;
 }
 
+/* Main grid container becomes a flex container for columns */
 .calendarGrid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    /* Force 3 columns as requested */
+    display: flex;
     gap: 1.5rem;
     align-items: start;
+    width: 100%;
+}
+
+/* Individual vertical columns */
+.masonryColumn {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    /* Vertical gap between cards */
+    flex: 1;
+    /* Distribute width equally */
+    min-width: 0;
+    /* Prevent flex overflow */
 }
 
 @media (max-width: 1024px) {
@@ -16,10 +28,20 @@
     }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 640px) {
     .calendarGrid {
         grid-template-columns: 1fr;
     }
+}
+
+/* Background Grid Pattern */
+.container {
+    background-color: #f9fafb;
+    background-image:
+        linear-gradient(to right, #e5e7eb 1px, transparent 1px),
+        linear-gradient(to bottom, #e5e7eb 1px, transparent 1px);
+    background-size: 40px 40px;
+    background-position: center top;
 }
 
 .header {
@@ -27,18 +49,42 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 2rem;
+    padding: 0;
 }
 
-.title {
-    font-size: 2rem;
-    font-weight: 800;
-    color: var(--color-text-main);
+.brandTitle {
+    font-family: serif;
+    /* Use serif to approximate 'kinu' font */
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #1f2937;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .actions {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 0.75rem;
+}
+
+/* Reference button style: dark grey, rounded, white text */
+.actions :global(.btn) {
+    background-color: #374151;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    border: none;
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+}
+
+.actions :global(.btn):hover {
+    background-color: #1f2937;
 }
 
 .loading {
@@ -60,4 +106,10 @@
     100% {
         opacity: 1;
     }
+}
+
+.contentWrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1rem 0;
 }

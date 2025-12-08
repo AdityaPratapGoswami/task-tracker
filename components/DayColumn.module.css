@@ -1,51 +1,165 @@
+/* Day Card Container */
 .column {
     background: var(--color-white);
-    border-radius: var(--radius-lg);
+    border-radius: 12px;
     display: flex;
     flex-direction: column;
-    /* height: 100%;  Removed to fit content */
-    /* min-height: 400px; Removed to fit content */
-    box-shadow: var(--shadow-md);
-    border: 1px solid black;
-    height: fit-content;
-    /* Ensure it fits content */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    border: 1px solid #d1d5db;
+    /* Grey border */
+    overflow: hidden;
+    /* Ensure header radius clips */
+    height: 100%;
+    /* Uniform height */
 }
 
+/* Header Section */
 .header {
     padding: 0.75rem 1rem;
-    background-color: var(--color-bg-grid);
-    border-bottom: 1px solid #e2e8f0;
+    background-color: #e5e7eb;
+    /* Light grey header like reference */
+    border-bottom: 1px solid #d1d5db;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
 }
 
+/* Day Name Typography */
 .dayName {
     font-weight: 700;
-    font-size: 1rem;
-    color: var(--color-text-main);
+    font-size: 0.9rem;
+    color: #374151;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
 }
 
+/* Date Typography */
 .date {
     font-size: 0.9rem;
-    color: var(--color-text-muted);
+    color: #6b7280;
     font-weight: 500;
 }
 
 .content {
     padding: 1rem;
-    /* flex: 1; Removed to prevent expansion */
-    padding-bottom: 2rem;
-    /* Add some bottom padding for visual balance */
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    flex: 1;
 }
 
-.emptyState {
-    color: var(--color-text-muted);
-    text-align: center;
-    margin-top: 2rem;
-    font-size: 0.9rem;
+/* Category Bars */
+.categoryBar {
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.green {
+    background-color: #d1fae5;
+    /* Tailwind green-100 */
+    border-left: 4px solid #10b981;
+    /* Accent on left or use progress bar color */
+}
+
+.blue {
+    background-color: #dbeafe;
+    /* Tailwind blue-100 */
+    border-left: 4px solid #3b82f6;
+}
+
+.yellow {
+    background-color: #fef3c7;
+    /* Tailwind yellow-100 */
+    border-left: 4px solid #f59e0b;
+}
+
+.barHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #4b5563;
+}
+
+.barCount {
+    color: #6b7280;
+    font-size: 0.8rem;
+}
+
+.progressTrack {
+    height: 4px;
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.5);
+    border-radius: 2px;
+    margin-top: 4px;
+    overflow: hidden;
+}
+
+.progressBar {
+    height: 100%;
+    background-color: currentColor;
+    /* Use text color or specific color */
+    border-radius: 2px;
+    opacity: 0.8;
+}
+
+.green .progressBar {
+    background-color: #10b981;
+}
+
+.blue .progressBar {
+    background-color: #3b82f6;
+}
+
+.yellow .progressBar {
+    background-color: #f59e0b;
+}
+
+/* ... existing progressBar ... */
+
+/* Animation Container - Using Grid Trick for smooth height transition */
+/* Animation Container - Using Grid Trick for smooth height transition */
+.taskListWrapper {
+    display: grid;
+    grid-template-rows: 0fr;
+    /* Standard easing: starts slower, speeds up, then slows down. Smoother. */
+    transition: grid-template-rows 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0.5;
+}
+
+.taskListWrapper.expanded {
+    grid-template-rows: 1fr;
+    opacity: 1;
+}
+
+.taskListInner {
+    overflow: hidden;
+}
+
+.taskList {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px dashed rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.emptyTaskMsg {
+    font-size: 0.8rem;
+    color: #6b7280;
     font-style: italic;
+    text-align: center;
+    padding: 0.5rem 0;
+}
+
+.quote {
+    margin-top: auto;
+    font-size: 0.75rem;
+    color: #4b5563;
+    font-style: italic;
+    padding-top: 0.5rem;
 }

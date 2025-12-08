@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { ITask } from '@/models/Task';
 import DayColumn from './DayColumn';
 import AddTaskModal from './AddTaskModal';
-import { Plus, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, ChevronLeft, ChevronRight, User } from 'lucide-react';
 import styles from './WeekView.module.css';
 import { useAuth } from '@/context/AuthContext';
 
@@ -173,81 +173,110 @@ export default function WeekView() {
 
     return (
         <div className={styles.container}>
-            <div className={styles.header}>
-                <h1 className={styles.title}>Weekly Tracker</h1>
-                <div className={styles.actions}>
-                    <Link href="/day" className="btn">
-                        Day View
-                    </Link>
-                    <Link href="/profile" className="btn">
-                        Profile
-                    </Link>
-                    <Link href="/analytics" className="btn">
-                        Analytics
-                    </Link>
-                    <button className="btn" onClick={() => setIsModalOpen(true)}>
-                        <Plus size={18} style={{ marginRight: '0.5rem' }} />
-                        Add Task
-                    </button>
-                    {/* Logout moved to Profile page */}
+            <div className={styles.contentWrapper}>
+                <div className={styles.header}>
+                    <h1 className={styles.brandTitle}>
+                        Balance & Bloom
+                    </h1>
+                    <div className={styles.actions}>
+                        <Link href="/day" className="btn">
+                            Day View
+                        </Link>
+                        <Link href="/analytics" className="btn">
+                            Analytics
+                        </Link>
+                        <Link href="/profile" className="btn" title="Profile">
+                            <User size={18} />
+                        </Link>
+                    </div>
                 </div>
-            </div>
 
-            <AddTaskModal
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                onAdd={handleAddTask}
-            />
+                <AddTaskModal
+                    isOpen={isModalOpen}
+                    onClose={() => setIsModalOpen(false)}
+                    onAdd={handleAddTask}
+                />
 
-            {!currentDate || loading ? (
-                <div className={styles.calendarGrid}>
-                    {Array.from({ length: 7 }).map((_, i) => (
-                        <div key={i} className={styles.card} style={{ height: '300px', animation: 'pulse 1.5s infinite', background: 'white', borderRadius: '0.75rem', border: '1px solid #e2e8f0' }}>
-                            <div style={{ padding: '1rem', height: '100%' }}>
-                                <div style={{ height: '24px', width: '40%', background: '#f1f5f9', borderRadius: '4px', marginBottom: '1rem' }}></div>
-                                <div style={{ height: '16px', width: '80%', background: '#f1f5f9', borderRadius: '4px', marginBottom: '0.5rem' }}></div>
-                                <div style={{ height: '16px', width: '60%', background: '#f1f5f9', borderRadius: '4px' }}></div>
+                {!currentDate || loading ? (
+                    <div className={styles.calendarGrid}>
+                        {Array.from({ length: 7 }).map((_, i) => (
+                            <div key={i} className={styles.card} style={{ height: '300px', animation: 'pulse 1.5s infinite', background: 'white', borderRadius: '0.75rem', border: '1px solid #e2e8f0' }}>
+                                <div style={{ padding: '1rem', height: '100%' }}>
+                                    <div style={{ height: '24px', width: '40%', background: '#f1f5f9', borderRadius: '4px', marginBottom: '1rem' }}></div>
+                                    <div style={{ height: '16px', width: '80%', background: '#f1f5f9', borderRadius: '4px', marginBottom: '0.5rem' }}></div>
+                                    <div style={{ height: '16px', width: '60%', background: '#f1f5f9', borderRadius: '4px' }}></div>
+                                </div>
                             </div>
+                        ))}
+                    </div>
+                ) : (
+                    <>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--color-white)', padding: '0.25rem 0.5rem', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-sm)', border: '1px solid black', width: 'fit-content' }}>
+                                <button data-testid="prev-week-btn" onClick={handlePrevWeek} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.25rem', display: 'flex', alignItems: 'center' }}>
+                                    <ChevronLeft size={20} color="var(--color-text-main)" />
+                                </button>
+                                <span style={{ fontWeight: 600, color: 'var(--color-text-main)', minWidth: '140px', textAlign: 'center' }}>
+                                    {dateRangeStr}
+                                </span>
+                                <button data-testid="next-week-btn" onClick={handleNextWeek} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.25rem', display: 'flex', alignItems: 'center' }}>
+                                    <ChevronRight size={20} color="var(--color-text-main)" />
+                                </button>
+                            </div>
+
+                            <button
+                                onClick={() => setIsModalOpen(true)}
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    background: 'var(--color-white)',
+                                    padding: '0.5rem',
+                                    borderRadius: '50%', // Circular button
+                                    boxShadow: 'var(--shadow-sm)',
+                                    border: '1px solid black',
+                                    cursor: 'pointer',
+                                    color: 'var(--color-text-main)'
+                                }}
+                                title="Add Task"
+                            >
+                                <Plus size={20} />
+                            </button>
                         </div>
-                    ))}
-                </div>
-            ) : (
-                <>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--color-white)', padding: '0.25rem 0.5rem', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-sm)', border: '1px solid black', marginBottom: '1rem', width: 'fit-content' }}>
-                        <button data-testid="prev-week-btn" onClick={handlePrevWeek} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.25rem', display: 'flex', alignItems: 'center' }}>
-                            <ChevronLeft size={20} color="var(--color-text-main)" />
-                        </button>
-                        <span style={{ fontWeight: 600, color: 'var(--color-text-main)', minWidth: '140px', textAlign: 'center' }}>
-                            {dateRangeStr}
-                        </span>
-                        <button data-testid="next-week-btn" onClick={handleNextWeek} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.25rem', display: 'flex', alignItems: 'center' }}>
-                            <ChevronRight size={20} color="var(--color-text-main)" />
-                        </button>
-                    </div>
-                    <WeekSummary
-                        days={weekDays}
-                        tasks={tasks}
-                        gratitudes={gratitudes}
-                        journals={journals}
-                    />
+                        <div className={styles.calendarGrid} style={{ marginTop: '1rem' }}>
+                            {/* Render 3 Columns for Masonry Effect */}
+                            {[0, 1, 2].map(colIndex => (
+                                <div key={colIndex} className={styles.masonryColumn}>
+                                    {weekDays
+                                        .filter((_, index) => index % 3 === colIndex)
+                                        .map(day => {
+                                            const dateStr = format(day, 'yyyy-MM-dd');
+                                            const dayTasks = tasks.filter(t => t.date === dateStr);
+                                            return (
+                                                <DayColumn
+                                                    key={dateStr}
+                                                    date={day}
+                                                    tasks={dayTasks}
+                                                    onToggleTask={(id, isCompleted) => handleToggleTask(id, isCompleted, dateStr)}
+                                                />
+                                            );
+                                        })
+                                    }
+                                </div>
+                            ))}
+                        </div>
 
-
-                    <div className={styles.calendarGrid} style={{ marginTop: '2rem' }}>
-                        {weekDays.map(day => {
-                            const dateStr = format(day, 'yyyy-MM-dd');
-                            const dayTasks = tasks.filter(t => t.date === dateStr);
-                            return (
-                                <DayColumn
-                                    key={dateStr}
-                                    date={day}
-                                    tasks={dayTasks}
-                                    onToggleTask={(id, isCompleted) => handleToggleTask(id, isCompleted, dateStr)}
-                                />
-                            );
-                        })}
-                    </div>
-                </>
-            )}
+                        <div style={{ marginTop: '3rem' }}>
+                            <WeekSummary
+                                days={weekDays}
+                                tasks={tasks}
+                                gratitudes={gratitudes}
+                                journals={journals}
+                            />
+                        </div>
+                    </>
+                )}
+            </div>
         </div>
     );
 }

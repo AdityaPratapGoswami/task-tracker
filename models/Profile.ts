@@ -1,7 +1,7 @@
-import mongoose, { Schema, Document, model } from 'mongoose';
+import mongoose, { Schema, Document, model, ObjectId } from 'mongoose';
 
 export interface IProfile extends Document {
-    userId: string;
+    userId: ObjectId | string;
     name: string;
     updatedAt: Date;
 }

@@ -1,7 +1,7 @@
-import mongoose, { Schema, Document, model } from 'mongoose';
+import mongoose, { Schema, Document, model, ObjectId } from 'mongoose';
 
 export interface IGratitude extends Document {
-    userId: string;
+    userId: ObjectId | string;
     date: string;
     content: string;
 }

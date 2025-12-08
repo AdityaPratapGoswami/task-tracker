@@ -14,7 +14,11 @@ export async function GET(request: Request) {
             $or: [
                 {
                     type: 'regular',
-                    date: { $lte: endDate } // Only show regular tasks created on or before the end of the query range
+                    date: { $lte: endDate }, // Only show regular tasks created on or before the end of the query range
+                    $or: [
+                        { endDate: { $exists: false } },
+                        { endDate: { $gte: startDate } }
+                    ]
                 },
                 {
                     type: 'spontaneous',

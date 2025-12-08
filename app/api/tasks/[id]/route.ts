@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/db';
 import Task from '@/models/Task';
+import { format, subDays } from 'date-fns';
 
 export async function PATCH(
     request: Request,
@@ -48,13 +49,34 @@ export async function DELETE(
 ) {
     try {
         const { id } = await params;
+        const { searchParams } = new URL(request.url);
+        const dateParam = searchParams.get('date');
+
         await connectToDatabase();
 
-        const task = await Task.findByIdAndDelete(id);
+        const task = await Task.findById(id);
 
         if (!task) {
             return NextResponse.json({ error: 'Task not found' }, { status: 404 });
         }
+
+        // If it's a regular task and we have a context date, we "archive" it by setting an endDate
+        if (task.type === 'regular' && dateParam) {
+            // Set endDate to yesterday relative to the deletion date
+            // This means it will stop appearing from 'dateParam' onwards
+            const endDate = format(subDays(new Date(dateParam), 1), 'yyyy-MM-dd');
+
+            const updatedTask = await Task.findByIdAndUpdate(
+                id,
+                { endDate },
+                { new: true }
+            );
+
+            return NextResponse.json({ message: 'Task archived', task: updatedTask });
+        }
+
+        // For spontaneous tasks or if no date provided, hard delete
+        await Task.findByIdAndDelete(id);
 
         return NextResponse.json({ message: 'Task deleted' });
     } catch (error) {

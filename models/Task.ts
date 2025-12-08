@@ -7,6 +7,7 @@ export interface ITaskBase {
     isCompleted: boolean; // For spontaneous tasks (and legacy)
     completedDates: string[]; // For regular tasks: list of YYYY-MM-DD
     date: string; // YYYY-MM-DD (Creation date for Regular, Due date for Spontaneous)
+    endDate?: string; // YYYY-MM-DD (End date for Regular tasks, inclusive)
 }
 
 export interface ITask extends ITaskBase {
@@ -28,6 +29,7 @@ const TaskSchema: Schema = new Schema(
         isCompleted: { type: Boolean, default: false },
         completedDates: { type: [String], default: [] },
         date: { type: String, required: true, index: true },
+        endDate: { type: String },
     },
     {
         timestamps: true,

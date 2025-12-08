@@ -114,7 +114,8 @@ export default function ProfilePage() {
 
     const handleDeleteTask = async (id: string) => {
         try {
-            const res = await fetch(`/api/tasks/${id}`, { method: 'DELETE' });
+            const today = format(new Date(), 'yyyy-MM-dd');
+            const res = await fetch(`/api/tasks/${id}?date=${today}`, { method: 'DELETE' });
             if (res.ok) {
                 fetchTasks();
             }

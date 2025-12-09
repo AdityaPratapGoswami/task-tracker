@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
 import styles from '../auth.module.css';
-import { Zap } from 'lucide-react';
+import Logo from '@/components/Logo';
 
 export default function LoginPage() {
     const [email, setEmail] = useState('');
@@ -21,13 +21,12 @@ export default function LoginPage() {
             setError(err.message);
         }
     };
-
     return (
         <div className={styles.container}>
             <div className={styles.authCard}>
                 <div className={styles.header}>
-                    <div className={styles.logo}>
-                        <Zap size={24} />
+                    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
+                        <Logo size="large" showText={false} />
                     </div>
                     <h1 className={styles.title}>Welcome Back</h1>
                     <p className={styles.subtitle}>Enter your details to access your tasks.</p>

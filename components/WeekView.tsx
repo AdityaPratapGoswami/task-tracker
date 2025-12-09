@@ -5,6 +5,7 @@ import { startOfWeek, addDays, format, subDays, endOfWeek } from 'date-fns';
 import Link from 'next/link';
 import { ITask } from '@/models/Task';
 import DayColumn from './DayColumn';
+import Logo from './Logo';
 import AddTaskModal from './AddTaskModal';
 import { Plus, ChevronLeft, ChevronRight, User } from 'lucide-react';
 import styles from './WeekView.module.css';
@@ -176,9 +177,9 @@ export default function WeekView() {
         <div className={styles.container}>
             <div className={styles.contentWrapper}>
                 <div className={styles.header}>
-                    <h1 className={styles.brandTitle}>
-                        Balance & Bloom
-                    </h1>
+                    <div className={styles.brandWrapper}>
+                        <Logo size="large" />
+                    </div>
                     <div className={styles.actions}>
                         <Link href="/day" className="btn">
                             Day View

@@ -7,6 +7,7 @@ import { ITask } from '@/models/Task';
 import DayColumn from '@/components/DayColumn';
 import AddTaskModal from '@/components/AddTaskModal';
 import { Plus, Save, User } from 'lucide-react';
+import DayViewContentSkeleton, { DayViewJournalSkeleton } from '@/components/DayViewContentSkeleton';
 import styles from '@/components/WeekView.module.css'; // Reusing WeekView styles
 
 export default function DayView() {
@@ -230,9 +231,10 @@ export default function DayView() {
                 />
 
                 {loading || !currentDate ? (
-                    <div className={styles.card} style={{ height: '300px', animation: 'pulse 1.5s infinite', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <div style={{ color: 'var(--color-text-muted)' }}>Loading...</div>
-                    </div>
+                    <>
+                        <DayViewContentSkeleton />
+                        <DayViewJournalSkeleton />
+                    </>
                 ) : (
                     <>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>

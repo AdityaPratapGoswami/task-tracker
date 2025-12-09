@@ -13,6 +13,7 @@ import { useAuth } from '@/context/AuthContext';
 import WeekSummary from './WeekSummary';
 import { IGratitude } from '@/models/Gratitude';
 import { IJournal } from '@/models/Journal';
+import WeekViewSkeleton from './WeekViewSkeleton';
 
 export default function WeekView() {
     const [tasks, setTasks] = useState<ITask[]>([]);
@@ -198,17 +199,7 @@ export default function WeekView() {
                 />
 
                 {!currentDate || loading ? (
-                    <div className={styles.calendarGrid}>
-                        {Array.from({ length: 7 }).map((_, i) => (
-                            <div key={i} className={styles.card} style={{ height: '300px', animation: 'pulse 1.5s infinite', background: 'white', borderRadius: '0.75rem', border: '1px solid #e2e8f0' }}>
-                                <div style={{ padding: '1rem', height: '100%' }}>
-                                    <div style={{ height: '24px', width: '40%', background: '#f1f5f9', borderRadius: '4px', marginBottom: '1rem' }}></div>
-                                    <div style={{ height: '16px', width: '80%', background: '#f1f5f9', borderRadius: '4px', marginBottom: '0.5rem' }}></div>
-                                    <div style={{ height: '16px', width: '60%', background: '#f1f5f9', borderRadius: '4px' }}></div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+                    <WeekViewSkeleton />
                 ) : (
                     <>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>

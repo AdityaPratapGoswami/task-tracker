@@ -1,15 +1,20 @@
-import connectToDatabase from '../lib/db';
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env.local' });
+
 import mongoose from 'mongoose';
-import Task from '../models/Task';
-import Category from '../models/Category';
-import Profile from '../models/Profile';
-import Gratitude from '../models/Gratitude';
 
 async function inspect() {
+    const { default: connectToDatabase } = await import('../lib/db');
+    const { default: Task } = await import('../models/Task');
+    const { default: Category } = await import('../models/Category');
+    const { default: Profile } = await import('../models/Profile');
+    const { default: Gratitude } = await import('../models/Gratitude');
+    const { default: Journal } = await import('../models/Journal');
+
     try {
         const conn = await connectToDatabase();
-        if (!conn) {
-            console.log("Failed to connect");
+        if (!conn || !conn.connection.db) {
+            console.log("Failed to connect or No Database found");
             return;
         }
 

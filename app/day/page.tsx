@@ -301,19 +301,15 @@ export default function DayView() {
                                     <button
                                         onClick={saveGratitude}
                                         disabled={isSavingGratitude}
+                                        className="btn"
                                         style={{
-                                            background: 'none',
-                                            border: 'none',
+                                            opacity: isSavingGratitude ? 0.7 : 1,
                                             cursor: isSavingGratitude ? 'not-allowed' : 'pointer',
-                                            color: isSavingGratitude ? 'var(--color-text-muted)' : 'var(--color-palette-bright)',
-                                            display: 'flex',
-                                            alignItems: 'center',
                                             gap: '0.5rem',
-                                            fontWeight: 600,
-                                            fontSize: '1rem'
+                                            padding: '0.5rem 1rem', // Match btn padding but explicit just in case
                                         }}
                                     >
-                                        <Save size={20} />
+                                        <Save size={18} />
                                         Save
                                     </button>
                                 </div>
@@ -350,19 +346,15 @@ export default function DayView() {
                                 <button
                                     onClick={saveJournal}
                                     disabled={isSavingJournal}
+                                    className="btn"
                                     style={{
-                                        background: 'none',
-                                        border: 'none',
+                                        opacity: isSavingJournal ? 0.7 : 1,
                                         cursor: isSavingJournal ? 'not-allowed' : 'pointer',
-                                        color: isSavingJournal ? 'var(--color-text-muted)' : 'var(--color-palette-bright)',
-                                        display: 'flex',
-                                        alignItems: 'center',
                                         gap: '0.5rem',
-                                        fontWeight: 600,
-                                        fontSize: '1rem'
+                                        padding: '0.5rem 1rem',
                                     }}
                                 >
-                                    <Save size={20} />
+                                    <Save size={18} />
                                     Save
                                 </button>
                             </div>

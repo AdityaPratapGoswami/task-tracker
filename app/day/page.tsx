@@ -242,7 +242,15 @@ export default function DayView() {
                             {/* Left Column: Progress & Tasks */}
                             <div style={{ display: 'flex', flexDirection: 'column' }}>
                                 {/* Progress Section */}
-                                <div className={styles.card} style={{ marginBottom: '2rem', padding: '1.5rem', background: 'white', borderRadius: '0.75rem', boxShadow: 'var(--shadow-md)', border: '1px solid black' }}>
+                                <div className={styles.card} style={{
+                                    marginBottom: '2rem',
+                                    padding: '1.5rem',
+                                    background: 'rgba(255, 255, 255, 0.7)',
+                                    backdropFilter: 'blur(16px) saturate(180%)',
+                                    borderRadius: '0.75rem',
+                                    boxShadow: 'var(--shadow-md)',
+                                    border: '1px solid rgba(255, 255, 255, 0.5)'
+                                }}>
                                     {(() => {
                                         const total = tasks.length;
                                         const completed = tasks.filter(t => t.isCompleted).length;
@@ -297,7 +305,16 @@ export default function DayView() {
                             </div>
 
                             {/* Right Column: Gratitude */}
-                            <div className={styles.card} style={{ background: 'white', padding: '1.5rem', borderRadius: '0.75rem', boxShadow: 'var(--shadow-md)', border: '1px solid black', display: 'flex', flexDirection: 'column' }}>
+                            <div className={styles.card} style={{
+                                background: 'rgba(255, 255, 255, 0.4)',
+                                backdropFilter: 'blur(16px) saturate(180%)',
+                                padding: '1.5rem',
+                                borderRadius: '0.75rem',
+                                boxShadow: 'var(--shadow-md)',
+                                border: '1px solid rgba(255, 255, 255, 0.5)',
+                                display: 'flex',
+                                flexDirection: 'column'
+                            }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                                     <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--color-text-main)' }}>Today's Gratitude</h3>
                                     <button
@@ -309,6 +326,7 @@ export default function DayView() {
                                             cursor: isSavingGratitude ? 'not-allowed' : 'pointer',
                                             gap: '0.5rem',
                                             padding: '0.5rem 1rem', // Match btn padding but explicit just in case
+                                            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)' // Added shadow
                                         }}
                                     >
                                         <Save size={18} />
@@ -331,7 +349,8 @@ export default function DayView() {
                                         lineHeight: '1.6',
                                         outline: 'none',
                                         fontFamily: 'inherit',
-                                        color: 'var(--color-text-main)'
+                                        color: 'var(--color-text-main)',
+                                        background: 'rgba(255, 255, 255, 0.5)' // Slightly translucent textarea
                                     }}
                                 />
                                 <div style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: 'var(--color-text-muted)', textAlign: 'right' }}>
@@ -342,7 +361,17 @@ export default function DayView() {
                         </div>
 
                         {/* Journal Section */}
-                        <div className={styles.card} style={{ background: 'white', padding: '1.5rem', borderRadius: '0.75rem', boxShadow: 'var(--shadow-md)', border: '1px solid black', marginTop: '2rem', display: 'flex', flexDirection: 'column' }}>
+                        <div className={styles.card} style={{
+                            background: 'rgba(255, 255, 255, 0.4)',
+                            backdropFilter: 'blur(16px) saturate(180%)',
+                            padding: '1.5rem',
+                            borderRadius: '0.75rem',
+                            boxShadow: 'var(--shadow-md)',
+                            border: '1px solid rgba(255, 255, 255, 0.5)',
+                            marginTop: '2rem',
+                            display: 'flex',
+                            flexDirection: 'column'
+                        }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                                 <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--color-text-main)' }}>Daily Journal</h3>
                                 <button
@@ -354,6 +383,7 @@ export default function DayView() {
                                         cursor: isSavingJournal ? 'not-allowed' : 'pointer',
                                         gap: '0.5rem',
                                         padding: '0.5rem 1rem',
+                                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)' // Added shadow
                                     }}
                                 >
                                     <Save size={18} />
@@ -375,7 +405,8 @@ export default function DayView() {
                                     lineHeight: '1.6',
                                     outline: 'none',
                                     fontFamily: 'inherit',
-                                    color: 'var(--color-text-main)'
+                                    color: 'var(--color-text-main)',
+                                    background: 'rgba(255, 255, 255, 0.5)' // Slightly translucent textarea
                                 }}
                             ></textarea>
                             <div style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: 'var(--color-text-muted)', textAlign: 'right' }}>

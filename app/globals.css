@@ -32,11 +32,12 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
-    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   background-color: var(--color-bg-grid);
   color: var(--color-text-main);
   line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 a {
@@ -78,38 +79,37 @@ a {
   box-shadow: var(--shadow-md);
 }
 
+/* Glassmorphic Button */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   height: 2.5rem;
-  /* Explicit height */
-  padding: 0 1rem;
-  /* Horizontal padding only, vertical handled by flex/height */
-  border-radius: var(--radius-md);
+  padding: 0 1.25rem;
+  border-radius: 9999px;
+  /* Pill shape */
   font-weight: 500;
-  font-size: 1rem;
-  /* Explicit font size */
+  font-size: 0.95rem;
   line-height: 1;
-  /* Reset line height */
   cursor: pointer;
-  border: none;
-  background-color: var(--color-grey-700);
-  color: var(--color-white);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--color-grey-800);
   transition: all 0.2s ease;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .btn:hover {
-  background-color: var(--color-grey-800);
-  opacity: 0.95;
+  background: rgba(255, 255, 255, 0.45);
   transform: translateY(-1px);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.08);
 }
 
 .btn:active {
   transform: translateY(0);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  background: rgba(255, 255, 255, 0.35);
 }
 
 .btn-icon {

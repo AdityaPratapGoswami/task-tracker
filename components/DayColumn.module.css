@@ -1,24 +1,23 @@
 /* Day Card Container */
+/* Glassmorphic Day Card */
 .column {
-    background: var(--color-white);
-    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border-radius: 16px;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    border: 1px solid #d1d5db;
-    /* Grey border */
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.5);
     overflow: hidden;
-    /* Ensure header radius clips */
     height: 100%;
-    /* Uniform height */
 }
 
 /* Header Section */
 .header {
     padding: 0.75rem 1rem;
-    background-color: #e5e7eb;
-    /* Light grey header like reference */
-    border-bottom: 1px solid #d1d5db;
+    background-color: rgba(255, 255, 255, 0.4);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -28,14 +27,16 @@
 .dayName {
     font-weight: 700;
     font-size: 0.9rem;
-    color: #374151;
+    color: #1f2937;
+    /* Darker for contrast on glass */
     text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 /* Date Typography */
 .date {
     font-size: 0.9rem;
-    color: #6b7280;
+    color: #4b5563;
     font-weight: 500;
 }
 
@@ -48,31 +49,35 @@
 }
 
 /* Category Bars */
+/* Category Bars - slightly translucent */
 .categoryBar {
-    border-radius: 8px;
+    border-radius: 10px;
     padding: 0.5rem 0.75rem;
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
 }
 
 .green {
-    background-color: #d1fae5;
-    /* Tailwind green-100 */
+    background-color: rgba(209, 250, 229, 0.8);
+    /* green-100 with opacity */
     border-left: 4px solid #10b981;
-    /* Accent on left or use progress bar color */
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
 }
 
 .blue {
-    background-color: #dbeafe;
-    /* Tailwind blue-100 */
+    background-color: rgba(219, 234, 254, 0.8);
+    /* blue-100 with opacity */
     border-left: 4px solid #3b82f6;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
 }
 
 .yellow {
-    background-color: #fef3c7;
-    /* Tailwind yellow-100 */
+    background-color: rgba(254, 243, 199, 0.8);
+    /* yellow-100 with opacity */
     border-left: 4px solid #f59e0b;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15);
 }
 
 .barHeader {

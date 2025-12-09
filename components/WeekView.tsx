@@ -203,32 +203,21 @@ export default function WeekView() {
                 ) : (
                     <>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--color-white)', padding: '0.25rem 0.5rem', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-sm)', border: '1px solid black', width: 'fit-content' }}>
-                                <button data-testid="prev-week-btn" onClick={handlePrevWeek} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.25rem', display: 'flex', alignItems: 'center' }}>
-                                    <ChevronLeft size={20} color="var(--color-text-main)" />
+                            <div className={styles.glassControl}>
+                                <button data-testid="prev-week-btn" onClick={handlePrevWeek} className={styles.navButton}>
+                                    <ChevronLeft size={20} />
                                 </button>
-                                <span style={{ fontWeight: 600, color: 'var(--color-text-main)', minWidth: '140px', textAlign: 'center' }}>
+                                <span className={styles.dateRangeText} style={{ textAlign: 'center' }}>
                                     {dateRangeStr}
                                 </span>
-                                <button data-testid="next-week-btn" onClick={handleNextWeek} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.25rem', display: 'flex', alignItems: 'center' }}>
-                                    <ChevronRight size={20} color="var(--color-text-main)" />
+                                <button data-testid="next-week-btn" onClick={handleNextWeek} className={styles.navButton}>
+                                    <ChevronRight size={20} />
                                 </button>
                             </div>
 
                             <button
                                 onClick={() => setIsModalOpen(true)}
-                                style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    background: 'var(--color-white)',
-                                    padding: '0.5rem',
-                                    borderRadius: '50%', // Circular button
-                                    boxShadow: 'var(--shadow-sm)',
-                                    border: '1px solid black',
-                                    cursor: 'pointer',
-                                    color: 'var(--color-text-main)'
-                                }}
+                                className={styles.glassButton}
                                 title="Add Task"
                             >
                                 <Plus size={20} />

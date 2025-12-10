@@ -15,6 +15,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Task Tracker",
   description: "A minimal weekly task tracker",
+  manifest: "/manifest.json",
 };
 
 import { AuthProvider } from "@/context/AuthContext";

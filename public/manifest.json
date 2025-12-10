@@ -1,0 +1,16 @@
+{
+    "name": "Task Tracker",
+    "short_name": "Tasks",
+    "description": "A minimal task tracking application",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#ffffff",
+    "icons": [
+        {
+            "src": "/icon.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}

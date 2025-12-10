@@ -18,13 +18,22 @@ export default function WeekSummary({ days, tasks, gratitudes, journals }: WeekS
     const [selectedEntry, setSelectedEntry] = useState<{ title: string; content: string; date: string } | null>(null);
 
     useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                setSelectedEntry(null);
+            }
+        };
+
         if (selectedEntry) {
             document.body.style.overflow = 'hidden';
+            window.addEventListener('keydown', handleKeyDown);
         } else {
             document.body.style.overflow = 'unset';
         }
+
         return () => {
             document.body.style.overflow = 'unset';
+            window.removeEventListener('keydown', handleKeyDown);
         };
     }, [selectedEntry]);
 

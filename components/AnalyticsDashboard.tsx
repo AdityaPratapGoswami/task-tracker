@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { startOfWeek, addDays, format, subDays, endOfWeek } from 'date-fns';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ArrowLeft, ChevronDown } from 'lucide-react';
+import Link from 'next/link';
 import {
     LineChart,
     Line,
@@ -47,6 +48,7 @@ export default function AnalyticsDashboard() {
     const [taskStats, setTaskStats] = useState<TaskStat[]>([]);
     const [mostDone, setMostDone] = useState<TaskStat | null>(null);
     const [leastDone, setLeastDone] = useState<TaskStat | null>(null);
+    const [isListExpanded, setIsListExpanded] = useState(true);
 
     useEffect(() => {
         setCurrentDate(new Date());
@@ -202,16 +204,22 @@ export default function AnalyticsDashboard() {
     return (
         <div className={styles.container}>
             <div className={styles.contentWrapper}>
-                <div className={styles.glassControl}>
-                    <button onClick={handlePrevWeek} className={styles.navButton}>
-                        <ChevronLeft size={20} />
-                    </button>
-                    <span className={styles.dateRangeText}>
-                        {dateRangeStr}
-                    </span>
-                    <button onClick={handleNextWeek} className={styles.navButton}>
-                        <ChevronRight size={20} />
-                    </button>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+                    <Link href="/" className={styles.glassButton} title="Back to Week View">
+                        <ArrowLeft size={20} />
+                    </Link>
+
+                    <div className={styles.glassControl}>
+                        <button onClick={handlePrevWeek} className={styles.navButton}>
+                            <ChevronLeft size={20} />
+                        </button>
+                        <span className={styles.dateRangeText}>
+                            {dateRangeStr}
+                        </span>
+                        <button onClick={handleNextWeek} className={styles.navButton}>
+                            <ChevronRight size={20} />
+                        </button>
+                    </div>
                 </div>
 
                 <div className={styles.chartContainer}>
@@ -277,29 +285,48 @@ export default function AnalyticsDashboard() {
                     </div>
 
                     <div className={styles.taskListContainer}>
-                        <h4 className={styles.taskListHeader}>Regular Task Performance</h4>
-                        {taskStats.length > 0 ? (
-                            <div>
-                                {taskStats.map(stat => (
-                                    <div key={stat.id} className={styles.taskListItem}>
-                                        <div className={styles.taskInfo}>
-                                            <div className={styles.taskTitle}>{stat.title}</div>
-                                        </div>
-                                        <div className={styles.taskMeta}>
-                                            <div className={styles.progressBar}>
-                                                <div
-                                                    className={`${styles.progressFill} ${stat.completionRate >= 66 ? styles.high : stat.completionRate >= 33 ? styles.medium : styles.low}`}
-                                                    style={{ width: `${stat.completionRate}%` }}
-                                                />
+                        <div className={styles.taskListHeader} onClick={() => setIsListExpanded(!isListExpanded)} style={{ cursor: 'pointer' }}>
+                            <span>Regular Task Performance</span>
+                            <ChevronDown
+                                size={20}
+                                style={{
+                                    transform: isListExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+                                    transition: 'transform 0.6s ease'
+                                }}
+                            />
+                        </div>
+
+                        <div style={{
+                            maxHeight: isListExpanded ? '2000px' : '0',
+                            opacity: isListExpanded ? 1 : 0,
+                            overflow: 'hidden',
+                            transition: 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)'
+                        }}>
+                            <div style={{ paddingTop: '2rem' }}>
+                                {taskStats.length > 0 ? (
+                                    <div>
+                                        {taskStats.map(stat => (
+                                            <div key={stat.id} className={styles.taskListItem}>
+                                                <div className={styles.taskInfo}>
+                                                    <div className={styles.taskTitle}>{stat.title}</div>
+                                                </div>
+                                                <div className={styles.taskMeta}>
+                                                    <div className={styles.progressBar}>
+                                                        <div
+                                                            className={`${styles.progressFill} ${stat.completionRate >= 66 ? styles.high : stat.completionRate >= 33 ? styles.medium : styles.low}`}
+                                                            style={{ width: `${stat.completionRate}%` }}
+                                                        />
+                                                    </div>
+                                                    <div className={styles.percentage}>{stat.completionRate}%</div>
+                                                </div>
                                             </div>
-                                            <div className={styles.percentage}>{stat.completionRate}%</div>
-                                        </div>
+                                        ))}
                                     </div>
-                                ))}
+                                ) : (
+                                    <div className={styles.noData}>No regular tasks found for this week.</div>
+                                )}
                             </div>
-                        ) : (
-                            <div className={styles.noData}>No regular tasks found for this week.</div>
-                        )}
+                        </div>
                     </div>
                 </div>
 

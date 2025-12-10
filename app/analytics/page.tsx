@@ -4,8 +4,8 @@ import { ArrowLeft } from 'lucide-react';
 
 export default function AnalyticsPage() {
     return (
-        <main className="container">
-            <div style={{ marginBottom: '1rem' }}>
+        <main>
+            <div style={{ position: 'absolute', top: '1rem', left: '1rem', zIndex: 10 }}>
                 <Link
                     href="/"
                     className="btn"
@@ -18,9 +18,10 @@ export default function AnalyticsPage() {
                         borderRadius: '50%',
                         width: '40px',
                         height: '40px',
-                        backgroundColor: 'var(--color-white)',
+                        backgroundColor: 'rgba(255, 255, 255, 0.5)',
+                        backdropFilter: 'blur(8px)',
                         color: 'var(--color-text-main)',
-                        border: '1px solid var(--color-grey-200)',
+                        border: '1px solid rgba(255, 255, 255, 0.5)',
                         boxShadow: 'var(--shadow-sm)'
                     }}
                 >

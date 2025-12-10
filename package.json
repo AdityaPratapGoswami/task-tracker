@@ -18,7 +18,8 @@
     "mongoose": "^9.0.1",
     "next": "16.0.7",
     "react": "19.2.0",
-    "react-dom": "19.2.0"
+    "react-dom": "19.2.0",
+    "recharts": "^3.5.1"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",

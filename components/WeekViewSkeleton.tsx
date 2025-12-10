@@ -16,16 +16,18 @@ export default function WeekViewSkeleton() {
                     </div>
                 </div>
 
-                <div className={styles.calendarGrid} style={{ marginTop: '2rem' }}>
-                    {/* Render 3 Columns for Masonry Effect Mimicry or just a simple grid */}
-                    {/* Since we don't have the masonry logic here easily, we'll just render the grid 
-              If the CSS handles columns, we just dump items.
-              However, WeekView uses a manual column split. 
-              Let's mimic the 3-column structure visually.
-          */}
+                <div className={styles.desktopGrid} style={{ marginTop: '2rem' }}>
                     {[0, 1, 2].map((colIndex) => (
                         <div key={colIndex} className={styles.masonryColumn}>
                             <SkeletonCard />
+                            <SkeletonCard />
+                        </div>
+                    ))}
+                </div>
+
+                <div className={styles.mobileGrid} style={{ marginTop: '2rem' }}>
+                    {[0, 1, 2, 3].map((index) => (
+                        <div key={index} style={{ marginBottom: '1.5rem' }}>
                             <SkeletonCard />
                         </div>
                     ))}

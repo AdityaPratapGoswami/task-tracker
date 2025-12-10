@@ -118,7 +118,7 @@ export default function ProfilePage() {
                         <Link href="/analytics" className="btn">
                             Analytics
                         </Link>
-                        <button onClick={logout} className="btn" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <button onClick={logout} className="btn" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', backgroundColor: '#fee2e2', color: '#dc2626', border: '1px solid #fecaca' }}>
                             <LogOut size={18} />
                             Logout
                         </button>

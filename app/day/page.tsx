@@ -8,7 +8,7 @@ import DayColumn from '@/components/DayColumn';
 import AddTaskModal from '@/components/AddTaskModal';
 import { Plus, Save, User } from 'lucide-react';
 import DayViewContentSkeleton, { DayViewJournalSkeleton } from '@/components/DayViewContentSkeleton';
-import styles from '@/components/WeekView.module.css'; // Reusing WeekView styles
+import styles from './page.module.css';
 
 export default function DayView() {
     const [tasks, setTasks] = useState<ITask[]>([]);
@@ -237,20 +237,12 @@ export default function DayView() {
                     </>
                 ) : (
                     <>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+                        <div className={styles.dayGrid}>
 
                             {/* Left Column: Progress & Tasks */}
                             <div style={{ display: 'flex', flexDirection: 'column' }}>
                                 {/* Progress Section */}
-                                <div className={styles.card} style={{
-                                    marginBottom: '2rem',
-                                    padding: '1.5rem',
-                                    background: 'rgba(255, 255, 255, 0.7)',
-                                    backdropFilter: 'blur(16px) saturate(180%)',
-                                    borderRadius: '0.75rem',
-                                    boxShadow: 'var(--shadow-md)',
-                                    border: '1px solid rgba(255, 255, 255, 0.5)'
-                                }}>
+                                <div className={styles.progressSection}>
                                     {(() => {
                                         const total = tasks.length;
                                         const completed = tasks.filter(t => t.isCompleted).length;
@@ -305,16 +297,7 @@ export default function DayView() {
                             </div>
 
                             {/* Right Column: Gratitude */}
-                            <div className={styles.card} style={{
-                                background: 'rgba(255, 255, 255, 0.4)',
-                                backdropFilter: 'blur(16px) saturate(180%)',
-                                padding: '1.5rem',
-                                borderRadius: '0.75rem',
-                                boxShadow: 'var(--shadow-md)',
-                                border: '1px solid rgba(255, 255, 255, 0.5)',
-                                display: 'flex',
-                                flexDirection: 'column'
-                            }}>
+                            <div className={styles.card}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                                     <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--color-text-main)' }}>Today's Gratitude</h3>
                                     <button
@@ -361,17 +344,7 @@ export default function DayView() {
                         </div>
 
                         {/* Journal Section */}
-                        <div className={styles.card} style={{
-                            background: 'rgba(255, 255, 255, 0.4)',
-                            backdropFilter: 'blur(16px) saturate(180%)',
-                            padding: '1.5rem',
-                            borderRadius: '0.75rem',
-                            boxShadow: 'var(--shadow-md)',
-                            border: '1px solid rgba(255, 255, 255, 0.5)',
-                            marginTop: '2rem',
-                            display: 'flex',
-                            flexDirection: 'column'
-                        }}>
+                        <div className={styles.journalSection}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                                 <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--color-text-main)' }}>Daily Journal</h3>
                                 <button

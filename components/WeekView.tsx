@@ -224,8 +224,8 @@ export default function WeekView() {
                                 <Plus size={20} />
                             </button>
                         </div>
-                        <div className={styles.calendarGrid} style={{ marginTop: '1rem' }}>
-                            {/* Render 3 Columns for Masonry Effect */}
+                        {/* Desktop View: 3-Column Masonry */}
+                        <div className={styles.desktopGrid} style={{ marginTop: '1rem' }}>
                             {[0, 1, 2].map(colIndex => (
                                 <div key={colIndex} className={styles.masonryColumn}>
                                     {weekDays
@@ -245,6 +245,22 @@ export default function WeekView() {
                                     }
                                 </div>
                             ))}
+                        </div>
+
+                        {/* Mobile View: Chronological List */}
+                        <div className={styles.mobileGrid} style={{ marginTop: '1rem' }}>
+                            {weekDays.map(day => {
+                                const dateStr = format(day, 'yyyy-MM-dd');
+                                const dayTasks = tasks.filter(t => t.date === dateStr);
+                                return (
+                                    <DayColumn
+                                        key={dateStr}
+                                        date={day}
+                                        tasks={dayTasks}
+                                        onToggleTask={(id, isCompleted) => handleToggleTask(id, isCompleted, dateStr)}
+                                    />
+                                );
+                            })}
                         </div>
 
                         <div style={{ marginTop: '3rem' }}>

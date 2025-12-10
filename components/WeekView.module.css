@@ -3,34 +3,52 @@
 }
 
 /* Main grid container becomes a flex container for columns */
-.calendarGrid {
+/* Main grid container for Desktop (3 columns) */
+.desktopGrid {
     display: flex;
     gap: 1.5rem;
     align-items: start;
     width: 100%;
 }
 
-/* Individual vertical columns */
 .masonryColumn {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
-    /* Vertical gap between cards */
     flex: 1;
-    /* Distribute width equally */
     min-width: 0;
-    /* Prevent flex overflow */
 }
 
-@media (max-width: 1024px) {
-    .calendarGrid {
-        grid-template-columns: repeat(2, 1fr);
+/* Mobile Grid (Single Column) */
+.mobileGrid {
+    display: none;
+    /* Hidden by default */
+    flex-direction: column;
+    gap: 1.5rem;
+    width: 100%;
+}
+
+@media (max-width: 768px) {
+    .desktopGrid {
+        display: none;
+        /* Hide expensive masonry on mobile */
     }
-}
 
-@media (max-width: 640px) {
-    .calendarGrid {
-        grid-template-columns: 1fr;
+    .mobileGrid {
+        display: flex;
+        /* Show simple list on mobile */
+    }
+
+    .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .actions {
+        width: 100%;
+        justify-content: space-between;
+        flex-wrap: wrap;
     }
 }
 

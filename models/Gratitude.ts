@@ -15,6 +15,9 @@ const GratitudeSchema = new Schema<IGratitude>(
     { timestamps: true }
 );
 
+// Compound index for optimization
+GratitudeSchema.index({ userId: 1, date: 1 });
+
 // Prevent re-compilation of model
 if (mongoose.models.Gratitude && !mongoose.models.Gratitude.schema.paths.userId) {
     delete mongoose.models.Gratitude;

@@ -38,6 +38,10 @@ const TaskSchema: Schema = new Schema(
     }
 );
 
+// Compound indexes for optimization
+TaskSchema.index({ userId: 1, type: 1, date: 1 });
+TaskSchema.index({ userId: 1, type: 1, endDate: 1 });
+
 // Prevent recompilation of model in development
 // Fix for stale model in dev mode: check if schema has userId
 if (mongoose.models.Task && !mongoose.models.Task.schema.paths.userId) {

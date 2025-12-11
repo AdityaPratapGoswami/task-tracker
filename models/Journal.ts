@@ -15,6 +15,9 @@ const JournalSchema = new Schema<IJournal>(
     { timestamps: true }
 );
 
+// Compound index for optimization
+JournalSchema.index({ userId: 1, date: 1 });
+
 // Prevent re-compilation of model
 if (mongoose.models.Journal && !mongoose.models.Journal.schema.paths.userId) {
     delete mongoose.models.Journal;

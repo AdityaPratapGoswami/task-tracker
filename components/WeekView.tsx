@@ -16,16 +16,25 @@ import { IGratitude } from '@/models/Gratitude';
 import { IJournal } from '@/models/Journal';
 import WeekViewSkeleton from './WeekViewSkeleton';
 
-export default function WeekView() {
-    const [tasks, setTasks] = useState<ITask[]>([]);
-    const [gratitudes, setGratitudes] = useState<IGratitude[]>([]);
-    const [journals, setJournals] = useState<IJournal[]>([]);
-    const [loading, setLoading] = useState(true);
+interface WeekViewProps {
+    initialTasks?: ITask[];
+    initialGratitudes?: IGratitude[];
+    initialJournals?: IJournal[];
+}
+
+export default function WeekView({ initialTasks = [], initialGratitudes = [], initialJournals = [] }: WeekViewProps) {
+    const [tasks, setTasks] = useState<ITask[]>(initialTasks);
+    const [gratitudes, setGratitudes] = useState<IGratitude[]>(initialGratitudes);
+    const [journals, setJournals] = useState<IJournal[]>(initialJournals);
+    const [loading, setLoading] = useState(initialTasks.length === 0); // Only load if no initial data
     const [currentDate, setCurrentDate] = useState<Date | null>(null);
-    // const { logout } = useAuth(); // Moved to ProfilePage
-    // const { logout } = useAuth(); // Moved to ProfilePage
+
+    // We need a ref to track if we've done the initial load to prevent re-fetching immediately
+    // or to handle the case where we navigate back to "today"
+    const [isInitialLoad, setIsInitialLoad] = useState(true);
 
     useEffect(() => {
+        // Hydration fix: set date on client
         setCurrentDate(new Date());
     }, []);
 
@@ -50,6 +59,14 @@ export default function WeekView() {
 
     useEffect(() => {
         if (currentDate) {
+            // If it's the initial load and we have initial data, we might want to skip fetching
+            // BUT, ensuring text matches current week computation is tricky without prop drilling the date.
+            // For simplicity, if we have tasks and it is the initial load, we assume the server passed the right data for "today/this week".
+            if (isInitialLoad && initialTasks.length > 0) {
+                setIsInitialLoad(false);
+                setLoading(false);
+                return;
+            }
             fetchTasks();
         }
     }, [currentDate]);

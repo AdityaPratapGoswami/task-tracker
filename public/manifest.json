@@ -1,7 +1,7 @@
 {
-    "name": "Task Tracker",
-    "short_name": "Tasks",
-    "description": "A minimal task tracking application",
+    "name": "Balance",
+    "short_name": "Balance",
+    "description": "Organize your life with Balance",
     "start_url": "/",
     "display": "standalone",
     "background_color": "#ffffff",

@@ -15,7 +15,7 @@ export default function Logo({ size = 'medium', showText = true, className = '' 
             <div className={styles.iconWrapper}>
                 <Zap size={iconSize} fill="currentColor" />
             </div>
-            {showText && <span className={styles.text}>Balance & Bloom</span>}
+            {showText && <span className={styles.text}>Balance</span>}
         </div>
     );
 }

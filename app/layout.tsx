@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Task Tracker",
-  description: "A minimal weekly task tracker",
+  title: "Balance",
+  description: "Organize your life with Balance",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,

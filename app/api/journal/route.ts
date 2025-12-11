@@ -26,13 +26,13 @@ export async function GET(request: Request) {
         await connectToDatabase();
 
         if (date) {
-            const journal = await Journal.findOne({ date, userId: payload.userId });
+            const journal = await Journal.findOne({ date, userId: payload.userId }).lean();
             return NextResponse.json(journal || { date, content: '' });
         } else if (startDate && endDate) {
             const journals = await Journal.find({
                 userId: payload.userId,
                 date: { $gte: startDate, $lte: endDate }
-            });
+            }).lean();
             return NextResponse.json(journals);
         } else {
             return NextResponse.json({ error: 'Date or Date Range required' }, { status: 400 });

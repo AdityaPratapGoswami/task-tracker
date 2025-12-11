@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { format, isToday } from 'date-fns';
 import { ITask } from '@/models/Task';
 import styles from './DayColumn.module.css';
@@ -14,6 +14,13 @@ interface DayColumnProps {
     onToggleTask: (id: string, isCompleted: boolean) => void;
     style?: React.CSSProperties;
 }
+
+// Categories to track
+const TARGET_CATEGORIES = [
+    { key: 'Health', label: 'Health', color: 'green' },
+    { key: 'Relationships', label: 'Relationships', color: 'blue' },
+    { key: 'Wealth', label: 'Wealth', color: 'yellow' }
+];
 
 export default function DayColumn({ date, tasks, onToggleTask, style }: DayColumnProps) {
     const dayName = format(date, 'EEE');
@@ -30,15 +37,8 @@ export default function DayColumn({ date, tasks, onToggleTask, style }: DayColum
         }));
     };
 
-    // Categories to track
-    const targetCategories = [
-        { key: 'Health', label: 'Health', color: 'green' },
-        { key: 'Relationships', label: 'Relationships', color: 'blue' },
-        { key: 'Wealth', label: 'Wealth', color: 'yellow' }
-    ];
-
     // Calculate progress for each target category
-    const categoryStats = targetCategories.map(cat => {
+    const categoryStats = useMemo(() => TARGET_CATEGORIES.map(cat => {
         // Filter tasks that match this category (case-insensitive)
         const catTasks = tasks.filter(t => t.category.toLowerCase() === cat.key.toLowerCase());
         const total = catTasks.length;
@@ -50,7 +50,7 @@ export default function DayColumn({ date, tasks, onToggleTask, style }: DayColum
             hasTasks: total > 0,
             tasks: catTasks // Keep reference to tasks for rendering
         };
-    });
+    }), [tasks]);
 
     // Quotes for each day (Mon-Sun)
     const quotes = [

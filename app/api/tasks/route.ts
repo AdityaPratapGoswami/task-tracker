@@ -48,7 +48,7 @@ export async function GET(request: Request) {
             query.$or[1].date = startDate;
         }
 
-        const tasks = await Task.find(query).sort({ createdAt: 1 });
+        const tasks = await Task.find(query).sort({ createdAt: 1 }).lean();
         return NextResponse.json(tasks);
     } catch (error) {
         console.error('Error in GET /api/tasks:', error);

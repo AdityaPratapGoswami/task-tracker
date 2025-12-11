@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
     const token = request.cookies.get('token')?.value;
     const { pathname } = request.nextUrl;
 
@@ -21,7 +21,11 @@ export function middleware(request: NextRequest) {
     if (
         pathname.startsWith('/_next') ||
         pathname.startsWith('/static') ||
-        pathname.startsWith('/favicon.ico')
+        pathname.startsWith('/favicon.ico') ||
+        pathname === '/manifest.json' ||
+        pathname === '/icon.png' ||
+        pathname.startsWith('/sw.js') ||
+        pathname.startsWith('/workbox-')
     ) {
         return NextResponse.next();
     }

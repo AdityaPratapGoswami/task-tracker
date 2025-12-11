@@ -3,7 +3,7 @@ import skeletonStyles from './Skeleton.module.css'; // Reusing Skeleton animatio
 
 export default function DayViewContentSkeleton() {
     return (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginTop: '2rem' }}>
+        <div className={skeletonStyles.dayGridSkeleton}>
 
             {/* Left Column */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>

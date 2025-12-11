@@ -151,8 +151,33 @@ export default function WeekView() {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const handleAddTask = async (taskData: { title: string; category: string }) => {
-        // Use the Monday of the currently viewed week
-        const dateStr = format(weekDays[0], 'yyyy-MM-dd');
+        // Determine the date to use for the new task
+        // If "Today" is within the currently viewed week, default to Today.
+        // Otherwise (viewing past/future week), default to Monday of that week so it's visible.
+
+        const todayStr = format(new Date(), 'yyyy-MM-dd');
+        // Check if today is in the current weekDays list
+        const isTodayInView = weekDays.some(day => format(day, 'yyyy-MM-dd') === todayStr);
+
+        // Default to Monday of the viewed week if today is not in view
+        const dateStr = isTodayInView ? todayStr : format(weekDays[0], 'yyyy-MM-dd');
+
+        // Optimistic Update
+        const tempId = `temp-${Date.now()}`;
+        const tempTask: any = {
+            _id: tempId,
+            title: taskData.title,
+            category: taskData.category,
+            type: 'spontaneous', // Default type for new tasks from modal
+            date: dateStr,
+            isCompleted: false,
+            userId: 'temp-user',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            completedDates: []
+        };
+
+        setTasks(prev => [...prev, tempTask]);
 
         try {
             const res = await fetch('/api/tasks', {
@@ -166,10 +191,18 @@ export default function WeekView() {
             });
 
             if (res.ok) {
-                fetchTasks();
+                const savedTask = await res.json();
+                // Replace temp task with real saved task
+                setTasks(prev => prev.map(t => t._id === tempId ? savedTask : t));
+            } else {
+                // Remove temp task on error
+                console.error('Failed to create task, rolling back');
+                setTasks(prev => prev.filter(t => t._id !== tempId));
             }
         } catch (error) {
             console.error('Failed to create task', error);
+            // Remove temp task on error
+            setTasks(prev => prev.filter(t => t._id !== tempId));
         }
     };
 

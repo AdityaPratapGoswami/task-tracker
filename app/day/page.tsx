@@ -167,6 +167,24 @@ export default function DayView() {
 
     const handleAddTask = async (taskData: { title: string; category: string }) => {
         const dateStr = format(new Date(), 'yyyy-MM-dd');
+
+        // Optimistic Update
+        const tempId = `temp-${Date.now()}`;
+        const tempTask: any = {
+            _id: tempId,
+            title: taskData.title,
+            category: taskData.category,
+            type: 'spontaneous',
+            date: dateStr,
+            isCompleted: false,
+            userId: 'temp-user',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            completedDates: []
+        };
+
+        setTasks(prev => [...prev, tempTask]);
+
         try {
             const res = await fetch('/api/tasks', {
                 method: 'POST',
@@ -179,10 +197,14 @@ export default function DayView() {
             });
 
             if (res.ok) {
-                fetchTasks();
+                const savedTask = await res.json();
+                setTasks(prev => prev.map(t => t._id === tempId ? savedTask : t));
+            } else {
+                setTasks(prev => prev.filter(t => t._id !== tempId));
             }
         } catch (error) {
             console.error('Failed to create task', error);
+            setTasks(prev => prev.filter(t => t._id !== tempId));
         }
     };
 

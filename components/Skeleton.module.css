@@ -70,3 +70,17 @@
     flex-direction: column;
     gap: 0.5rem;
 }
+
+.dayGridSkeleton {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+@media (max-width: 768px) {
+    .dayGridSkeleton {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+}

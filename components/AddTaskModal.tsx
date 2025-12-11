@@ -34,6 +34,22 @@ export default function AddTaskModal({ isOpen, onClose, onAdd, defaultCategory }
         }
     }, [isOpen, defaultCategory]);
 
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                onClose();
+            }
+        };
+
+        if (isOpen) {
+            window.addEventListener('keydown', handleKeyDown);
+        }
+
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [isOpen, onClose]);
+
     const fetchCategories = async () => {
         try {
             const res = await fetch('/api/categories');
@@ -87,9 +103,9 @@ export default function AddTaskModal({ isOpen, onClose, onAdd, defaultCategory }
     return (
         <div className={styles.overlay}>
             <div className={styles.modal}>
-                <div className={styles.header} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                    <h2 className={styles.title} style={{ marginBottom: 0 }}>Add New Task</h2>
-                    <button onClick={onClose} className={styles.btnIcon} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                <div className={styles.header}>
+                    <h2 className={styles.title}>Add New Task</h2>
+                    <button onClick={onClose} className={styles.btnIcon}>
                         <X size={24} />
                     </button>
                 </div>
@@ -145,9 +161,9 @@ export default function AddTaskModal({ isOpen, onClose, onAdd, defaultCategory }
                                 />
                                 <button
                                     type="button"
-                                    className="btn"
+                                    className={`${styles.btn} ${styles.cancelBtn}`}
                                     onClick={() => setIsCreatingCategory(false)}
-                                    style={{ whiteSpace: 'nowrap' }}
+                                    style={{ whiteSpace: 'nowrap', height: 'auto' }}
                                 >
                                     Cancel
                                 </button>

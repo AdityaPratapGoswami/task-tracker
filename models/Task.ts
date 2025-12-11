@@ -27,7 +27,7 @@ const TaskSchema: Schema = new Schema(
         userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
         title: { type: String, required: true },
         category: { type: String, required: true },
-        type: { type: String, enum: ['regular', 'spontaneous'], default: 'spontaneous' },
+        type: { type: String, enum: ['regular', 'spontaneous'], default: 'spontaneous', index: true },
         isCompleted: { type: Boolean, default: false },
         completedDates: { type: [String], default: [] },
         date: { type: String, required: true, index: true },

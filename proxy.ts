@@ -6,7 +6,7 @@ export function proxy(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
     // Paths that do not require authentication
-    const publicPaths = ['/login', '/signup', '/api/auth/login', '/api/auth/signup'];
+    const publicPaths = ['/login', '/signup', '/api/auth/login', '/api/auth/signup', '/api/auth/google'];
 
     // Check if the current path is public
     if (publicPaths.some((path) => pathname.startsWith(path))) {

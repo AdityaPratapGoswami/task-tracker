@@ -5,6 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
 import styles from '../auth.module.css';
 import Logo from '@/components/Logo';
+import GoogleAuthButton from '@/components/GoogleAuthButton';
 
 export default function SignupPage() {
     const [name, setName] = useState('');
@@ -73,6 +74,13 @@ export default function SignupPage() {
                         Sign Up
                     </button>
                 </form>
+
+                <div className={styles.separator} style={{ margin: '1.5rem 0', textAlign: 'center', position: 'relative' }}>
+                    <span style={{ backgroundColor: '#fff', padding: '0 10px', color: '#666', fontSize: '0.875rem', position: 'relative', zIndex: 1 }}>Or continue with</span>
+                    <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, height: '1px', backgroundColor: '#eee', zIndex: 0 }}></div>
+                </div>
+
+                <GoogleAuthButton text="Sign up with Google" />
 
                 <p className={styles.footer}>
                     Already have an account?{' '}

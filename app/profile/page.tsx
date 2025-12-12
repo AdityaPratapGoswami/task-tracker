@@ -8,6 +8,7 @@ import { User, Calendar, Zap, Trash2, Plus, ChevronDown, LogOut } from 'lucide-r
 import AddTaskModal from '@/components/AddTaskModal';
 import { format } from 'date-fns';
 import Link from 'next/link';
+import NavBar from '@/components/NavBar';
 
 import { useAuth } from '@/context/AuthContext';
 
@@ -109,15 +110,11 @@ export default function ProfilePage() {
 
         <div className={sharedStyles.container}>
             <div className={sharedStyles.contentWrapper}>
+                <NavBar />
                 <div className={styles.header} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <h1 className={styles.title}>My Profile</h1>
                     <div className={sharedStyles.actions}>
-                        <Link href="/day" className="btn">
-                            Day View
-                        </Link>
-                        <Link href="/analytics" className="btn">
-                            Analytics
-                        </Link>
+                        {/* Navigation links removed */}
                         <button onClick={logout} className="btn" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', backgroundColor: '#fee2e2', color: '#dc2626', border: '1px solid #fecaca' }}>
                             <LogOut size={18} />
                             Logout

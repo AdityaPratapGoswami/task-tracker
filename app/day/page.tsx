@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
-import Link from 'next/link';
 import { ITask } from '@/models/Task';
+import NavBar from '@/components/NavBar';
+// import Link from 'next/link';
 import DayColumn from '@/components/DayColumn';
 import AddTaskModal from '@/components/AddTaskModal';
 import { Plus, Save, User } from 'lucide-react';
@@ -211,6 +212,7 @@ export default function DayView() {
     return (
         <div className={styles.container}>
             <div className={styles.contentWrapper}>
+                <NavBar />
                 <div className={styles.header}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                         <h1 className={styles.title}>Day View</h1>
@@ -233,17 +235,7 @@ export default function DayView() {
                             <Plus size={20} />
                         </button>
                     </div>
-                    <div className={styles.actions}>
-                        <Link href="/" className="btn">
-                            Week View
-                        </Link>
-                        <Link href="/analytics" className="btn">
-                            Analytics
-                        </Link>
-                        <Link href="/profile" className="btn" title="Profile">
-                            <User size={18} />
-                        </Link>
-                    </div>
+                    {/* Navigation moved to NavBar */}
                 </div>
 
                 <AddTaskModal

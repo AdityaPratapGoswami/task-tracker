@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { startOfWeek, addDays, format, subDays, endOfWeek } from 'date-fns';
-import { ChevronLeft, ChevronRight, ArrowLeft, ChevronDown } from 'lucide-react';
-import Link from 'next/link';
+import { ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
+// import Link from 'next/link';
+import NavBar from '@/components/NavBar';
 import {
     LineChart,
     Line,
@@ -204,10 +205,10 @@ export default function AnalyticsDashboard() {
     return (
         <div className={styles.container}>
             <div className={styles.contentWrapper}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-                    <Link href="/" className={styles.glassButton} title="Back to Week View">
-                        <ArrowLeft size={20} />
-                    </Link>
+                <NavBar />
+
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginBottom: '1rem', marginTop: '1rem' }}>
+                    {/* Back button removed as navigation is in NavBar */}
 
                     <div className={styles.glassControl}>
                         <button onClick={handlePrevWeek} className={styles.navButton}>

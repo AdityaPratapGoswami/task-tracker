@@ -41,6 +41,16 @@ body {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  padding-top: 4rem;
+}
+
+@media (max-width: 640px) {
+  body {
+    padding-top: 1rem;
+    /* Less top padding since navbar is at bottom */
+    padding-bottom: 5rem;
+    /* Space for bottom navbar */
+  }
 }
 
 a {

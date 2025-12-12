@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { startOfWeek, addDays, format, subDays, endOfWeek } from 'date-fns';
-import Link from 'next/link';
+import NavBar from './NavBar';
+// import Link from 'next/link'; // Removed Link as it is handled by NavBar
 import { ITask } from '@/models/Task';
 import DayColumn from './DayColumn';
 import Logo from './Logo';
@@ -226,21 +227,9 @@ export default function WeekView({ initialTasks = [], initialGratitudes = [], in
     return (
         <div className={styles.container}>
             <div className={styles.contentWrapper}>
-                <div className={styles.header}>
-                    <div className={styles.brandWrapper}>
-                        <Logo size="large" />
-                    </div>
-                    <div className={styles.actions}>
-                        <Link href="/day" className="btn">
-                            Day View
-                        </Link>
-                        <Link href="/analytics" className="btn">
-                            Analytics
-                        </Link>
-                        <Link href="/profile" className="btn" title="Profile">
-                            <User size={18} />
-                        </Link>
-                    </div>
+                <NavBar />
+                <div className={styles.header} style={{ marginTop: '1rem', marginBottom: '1rem' }}>
+                    {/* Header removed from here as it is now in NavBar */}
                 </div>
 
                 <AddTaskModal

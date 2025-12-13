@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { format } from 'date-fns';
 import { ITask } from '@/models/Task';
 import { IGratitude } from '@/models/Gratitude';
@@ -148,7 +149,7 @@ export default function WeekSummary({ days, tasks, gratitudes, journals }: WeekS
             </div>
 
             {
-                selectedEntry && (
+                selectedEntry && typeof document !== 'undefined' && createPortal(
                     <div className={styles.modalOverlay} onClick={() => setSelectedEntry(null)}>
                         <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
                             <div className={styles.modalHeader}>
@@ -164,7 +165,8 @@ export default function WeekSummary({ days, tasks, gratitudes, journals }: WeekS
                                 {selectedEntry.content}
                             </div>
                         </div>
-                    </div>
+                    </div>,
+                    document.body
                 )
             }
         </div>

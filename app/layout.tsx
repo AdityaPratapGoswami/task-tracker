@@ -34,6 +34,7 @@ export const viewport: Viewport = {
 };
 
 import { AuthProvider } from "@/context/AuthContext";
+import StatusBarManager from "@/components/StatusBarManager";
 
 export default function RootLayout({
   children,
@@ -45,6 +46,7 @@ export default function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable}`} suppressHydrationWarning>
         <AuthProvider>
           {children}
+          <StatusBarManager />
         </AuthProvider>
       </body>
     </html>

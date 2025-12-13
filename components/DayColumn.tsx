@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback, memo } from 'react';
 import { format, isToday } from 'date-fns';
 import { ITask } from '@/models/Task';
 import styles from './DayColumn.module.css';
@@ -15,12 +15,89 @@ interface DayColumnProps {
     style?: React.CSSProperties;
 }
 
+interface CategoryStat {
+    key: string;
+    label: string;
+    color: string;
+    total: number;
+    completed: number;
+    hasTasks: boolean;
+    tasks: ITask[];
+}
+
 // Categories to track
 const TARGET_CATEGORIES = [
     { key: 'Health', label: 'Health', color: 'green' },
     { key: 'Relationships', label: 'Relationships', color: 'blue' },
     { key: 'Wealth', label: 'Wealth', color: 'yellow' }
 ];
+
+// Memoized Category Section Component
+const CategorySection = memo(({
+    stat,
+    isExpanded,
+    onToggle,
+    onToggleTask
+}: {
+    stat: CategoryStat;
+    isExpanded: boolean;
+    onToggle: (key: string) => void;
+    onToggleTask: (id: string, isCompleted: boolean) => void;
+}) => {
+    return (
+        <div className={clsx(styles.categoryBar, styles[stat.color])}>
+            {/* Header is the clickable toggle */}
+            <div
+                onClick={() => onToggle(stat.key)}
+                style={{ cursor: 'pointer' }}
+            >
+                <div className={styles.barHeader}>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <span className={styles.barLabel}>{stat.label}</span>
+                        <ChevronDown
+                            size={16}
+                            className={styles.toggleIcon}
+                            style={{
+                                transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+                                transition: 'transform 0.3s ease',
+                                marginLeft: '4px',
+                                opacity: 0.6
+                            }}
+                        />
+                    </div>
+                    <span className={styles.barCount}>{stat.completed}/{stat.total}</span>
+                </div>
+                <div className={styles.progressTrack}>
+                    <div
+                        className={styles.progressBar}
+                        style={{ width: `${stat.total > 0 ? (stat.completed / stat.total) * 100 : 0}%` }}
+                    ></div>
+                </div>
+            </div>
+
+            {/* Content Wrapper for Animation */}
+            <div className={clsx(styles.taskListWrapper, isExpanded && styles.expanded)}>
+                <div className={styles.taskListInner}>
+                    <div className={styles.taskList}>
+                        {stat.tasks.length > 0 ? (
+                            stat.tasks.map(task => (
+                                <TaskItem
+                                    key={task._id as string}
+                                    task={task}
+                                    onToggle={onToggleTask}
+                                />
+                            ))
+                        ) : (
+                            <div className={styles.emptyTaskMsg}>No tasks yet</div>
+                        )}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+});
+
+CategorySection.displayName = 'CategorySection';
 
 export default function DayColumn({ date, tasks, onToggleTask, style }: DayColumnProps) {
     const dayName = format(date, 'EEE');
@@ -30,12 +107,12 @@ export default function DayColumn({ date, tasks, onToggleTask, style }: DayColum
     // State to track expanded categories by key
     const [expandedCats, setExpandedCats] = useState<Record<string, boolean>>({});
 
-    const toggleCategory = (key: string) => {
+    const toggleCategory = useCallback((key: string) => {
         setExpandedCats(prev => ({
             ...prev,
             [key]: !prev[key]
         }));
-    };
+    }, []);
 
     // Calculate progress for each target category
     const categoryStats = useMemo(() => TARGET_CATEGORIES.map(cat => {
@@ -78,58 +155,13 @@ export default function DayColumn({ date, tasks, onToggleTask, style }: DayColum
 
             <div className={styles.content}>
                 {categoryStats.map(stat => (
-                    <div
+                    <CategorySection
                         key={stat.key}
-                        className={clsx(styles.categoryBar, styles[stat.color])}
-                    >
-                        {/* Header is the clickable toggle */}
-                        <div
-                            onClick={() => toggleCategory(stat.key)}
-                            style={{ cursor: 'pointer' }}
-                        >
-                            <div className={styles.barHeader}>
-                                <div style={{ display: 'flex', alignItems: 'center' }}>
-                                    <span className={styles.barLabel}>{stat.label}</span>
-                                    <ChevronDown
-                                        size={16}
-                                        className={styles.toggleIcon}
-                                        style={{
-                                            transform: expandedCats[stat.key] ? 'rotate(180deg)' : 'rotate(0deg)',
-                                            transition: 'transform 0.3s ease',
-                                            marginLeft: '4px',
-                                            opacity: 0.6
-                                        }}
-                                    />
-                                </div>
-                                <span className={styles.barCount}>{stat.completed}/{stat.total}</span>
-                            </div>
-                            <div className={styles.progressTrack}>
-                                <div
-                                    className={styles.progressBar}
-                                    style={{ width: `${stat.total > 0 ? (stat.completed / stat.total) * 100 : 0}%` }}
-                                ></div>
-                            </div>
-                        </div>
-
-                        {/* Content Wrapper for Animation */}
-                        <div className={clsx(styles.taskListWrapper, expandedCats[stat.key] && styles.expanded)}>
-                            <div className={styles.taskListInner}>
-                                <div className={styles.taskList}>
-                                    {stat.tasks.length > 0 ? (
-                                        stat.tasks.map(task => (
-                                            <TaskItem
-                                                key={task._id as string}
-                                                task={task}
-                                                onToggle={onToggleTask}
-                                            />
-                                        ))
-                                    ) : (
-                                        <div className={styles.emptyTaskMsg}>No tasks yet</div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                        stat={stat}
+                        isExpanded={!!expandedCats[stat.key]}
+                        onToggle={toggleCategory}
+                        onToggleTask={onToggleTask}
+                    />
                 ))}
 
                 <div className={styles.quote}>

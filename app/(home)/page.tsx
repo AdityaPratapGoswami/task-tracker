@@ -57,7 +57,19 @@ async function getData() {
     query.$or[1].date = startDate; // Legacy logic preservation
   }
 
-  const tasksData = await Task.find(query).sort({ createdAt: 1 }).lean();
+
+  // Fetch Data in Parallel
+  const [tasksData, gratitudesData, journalsData] = await Promise.all([
+    Task.find(query).sort({ createdAt: 1 }).lean(),
+    Gratitude.find({
+      userId: userId,
+      date: { $gte: startDate, $lte: endDate }
+    }).lean(),
+    Journal.find({
+      userId: userId,
+      date: { $gte: startDate, $lte: endDate }
+    }).lean()
+  ]);
 
   // Process tasks to merge regular ones (Client logic duplicated for SSR)
   const processedTasks: any[] = [];
@@ -91,18 +103,6 @@ async function getData() {
     createdAt: item.createdAt?.toISOString(),
     updatedAt: item.updatedAt?.toISOString(),
   }));
-
-  // Fetch Gratitudes
-  const gratitudesData = await Gratitude.find({
-    userId: userId,
-    date: { $gte: startDate, $lte: endDate }
-  }).lean();
-
-  // Fetch Journals
-  const journalsData = await Journal.find({
-    userId: userId,
-    date: { $gte: startDate, $lte: endDate }
-  }).lean();
 
   return {
     tasks: serialize(processedTasks), // Tasks are already partly processed but need ID stringification

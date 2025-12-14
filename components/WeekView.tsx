@@ -228,8 +228,28 @@ export default function WeekView({ initialTasks = [], initialGratitudes = [], in
         <div className={styles.container}>
             <div className={styles.contentWrapper}>
                 <NavBar />
-                <div className={styles.header} style={{ marginTop: '1rem', marginBottom: '1rem' }}>
-                    {/* Header removed from here as it is now in NavBar */}
+                <div className={styles.header} style={{ marginTop: '0', marginBottom: '1rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        <h1 className={styles.title}>Week View</h1>
+                        <button
+                            onClick={() => setIsModalOpen(true)}
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                background: 'var(--color-white)',
+                                padding: '0.5rem',
+                                borderRadius: '50%', // Circular button
+                                boxShadow: 'var(--shadow-sm)',
+                                border: '1px solid black',
+                                cursor: 'pointer',
+                                color: 'var(--color-text-main)'
+                            }}
+                            title="Add Task"
+                        >
+                            <Plus size={20} />
+                        </button>
+                    </div>
                 </div>
 
                 <AddTaskModal
@@ -254,14 +274,6 @@ export default function WeekView({ initialTasks = [], initialGratitudes = [], in
                                     <ChevronRight size={20} />
                                 </button>
                             </div>
-
-                            <button
-                                onClick={() => setIsModalOpen(true)}
-                                className={styles.glassButton}
-                                title="Add Task"
-                            >
-                                <Plus size={20} />
-                            </button>
                         </div>
                         {/* Desktop View: 3-Column Masonry */}
                         <div className={styles.desktopGrid} style={{ marginTop: '1rem' }}>

@@ -18,7 +18,7 @@
 
 .title {
     font-size: 2rem;
-    font-weight: 800;
+    font-weight: 700;
     color: var(--color-text-main);
     margin: 0;
 }
@@ -79,13 +79,91 @@
 
     .header {
         flex-direction: column;
-        align-items: flex-start;
+        align-items: center;
+        /* Centered for mobile */
         gap: 1rem;
     }
 
     .actions {
         width: 100%;
-        justify-content: space-between;
+        justify-content: center;
+        /* Centered for mobile */
         flex-wrap: wrap;
+    }
+}
+
+/* Glassmorphic Controls (Copied from WeekView) */
+.glassControl {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 0.25rem 0.5rem;
+    border-radius: 9999px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    width: fit-content;
+    color: #374151;
+}
+
+.glassButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 0.5rem;
+    border-radius: 50%;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    border: 1px solid black;
+    cursor: pointer;
+    color: #374151;
+    transition: transform 0.2s, background-color 0.2s;
+}
+
+.glassButton:hover,
+.glassControl:hover {
+    background-color: rgba(255, 255, 255, 0.85);
+    transform: translateY(-1px);
+}
+
+.navButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.25rem;
+    display: flex;
+    align-items: center;
+    color: inherit;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+}
+
+.navButton:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.dateRangeText {
+    font-weight: 600;
+    color: #1f2937;
+    min-width: 140px;
+    text-align: center;
+}
+
+.navigatorContainer {
+    display: flex;
+    justify-content: flex-start;
+    /* Default: Left align */
+    margin-bottom: 1.5rem;
+    margin-top: -1rem;
+}
+
+@media (max-width: 768px) {
+    .navigatorContainer {
+        justify-content: center;
+        /* Centered for mobile */
     }
 }

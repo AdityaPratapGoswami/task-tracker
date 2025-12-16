@@ -41,7 +41,7 @@
     color: #6b7280;
     padding: 0.5rem 0.75rem;
     border-radius: 0.5rem;
-    font-weight: 500;
+    font-weight: 600;
     font-size: 0.95rem;
     transition: all 0.2s;
     display: flex;
@@ -91,7 +91,7 @@
     .navLink span {
         display: block;
         font-size: 0.7rem;
-        font-weight: 500;
+        font-weight: 600;
         margin-top: 2px;
     }
 

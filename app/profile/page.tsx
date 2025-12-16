@@ -110,7 +110,7 @@ export default function ProfilePage() {
 
         <div className={sharedStyles.container}>
             <div className={sharedStyles.contentWrapper}>
-                <NavBar />
+
                 <div className={styles.header} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <h1 className={styles.title}>My Profile</h1>
                     <div className={sharedStyles.actions}>

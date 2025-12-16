@@ -59,7 +59,7 @@ export default function WeekSummary({ days, tasks, gratitudes, journals }: WeekS
                         }}
                     />
                 </div>
-                <span>This week&apos;s Summary</span>
+                <span className="text-heading">This week&apos;s Summary</span>
             </div>
 
             <div style={{

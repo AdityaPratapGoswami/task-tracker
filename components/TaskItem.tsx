@@ -19,7 +19,7 @@ export default function TaskItem({ task, onToggle }: TaskItemProps) {
             <div className={styles.icon}>
                 {task.isCompleted ? <Check size={16} /> : <Square size={16} />}
             </div>
-            <span className={styles.title}>{task.title}</span>
+            <span className={`${styles.title} text-body`}>{task.title}</span>
         </div>
     );
 }

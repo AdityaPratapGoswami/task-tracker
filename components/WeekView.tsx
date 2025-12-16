@@ -227,24 +227,13 @@ export default function WeekView({ initialTasks = [], initialGratitudes = [], in
     return (
         <div className={styles.container}>
             <div className={styles.contentWrapper}>
-                <NavBar />
+
                 <div className={styles.header} style={{ marginTop: '0', marginBottom: '1rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <h1 className={styles.title}>Week View</h1>
+                        <h1 className={`${styles.title} text-title`}>Week View</h1>
                         <button
                             onClick={() => setIsModalOpen(true)}
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                background: 'var(--color-white)',
-                                padding: '0.5rem',
-                                borderRadius: '50%', // Circular button
-                                boxShadow: 'var(--shadow-sm)',
-                                border: '1px solid black',
-                                cursor: 'pointer',
-                                color: 'var(--color-text-main)'
-                            }}
+                            className={styles.glassButton}
                             title="Add Task"
                         >
                             <Plus size={20} />
@@ -262,7 +251,7 @@ export default function WeekView({ initialTasks = [], initialGratitudes = [], in
                     <WeekViewSkeleton />
                 ) : (
                     <>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+                        <div className={styles.navigatorContainer}>
                             <div className={styles.glassControl}>
                                 <button data-testid="prev-week-btn" onClick={handlePrevWeek} className={styles.navButton}>
                                     <ChevronLeft size={20} />

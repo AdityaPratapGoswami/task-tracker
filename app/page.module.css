@@ -56,7 +56,7 @@
 }
 
 .intro a {
-  font-weight: 500;
+  font-weight: 600;
   color: var(--text-primary);
 }
 
@@ -80,7 +80,7 @@
   transition: 0.2s;
   cursor: pointer;
   width: fit-content;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 a.primary {

@@ -37,7 +37,7 @@
 .date {
     font-size: 0.9rem;
     color: #4b5563;
-    font-weight: 500;
+    font-weight: 600;
 }
 
 .content {
@@ -91,7 +91,7 @@
 
 .barCount {
     color: #6b7280;
-    font-size: 0.8rem;
+    font-weight: 700;
 }
 
 .progressTrack {

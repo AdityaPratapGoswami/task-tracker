@@ -205,7 +205,7 @@ export default function AnalyticsDashboard() {
     return (
         <div className={styles.container}>
             <div className={styles.contentWrapper}>
-                <NavBar />
+
 
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginBottom: '1rem', marginTop: '1rem' }}>
                     {/* Back button removed as navigation is in NavBar */}
@@ -224,7 +224,7 @@ export default function AnalyticsDashboard() {
                 </div>
 
                 <div className={styles.chartContainer}>
-                    <h3 style={{ marginBottom: '1.5rem', color: 'var(--color-text-main)', fontSize: '1.1rem' }}>Weekly Task Completion Rate</h3>
+                    <h3 className="text-heading" style={{ marginBottom: '1.5rem', color: 'var(--color-text-main)' }}>Weekly Task Completion Rate</h3>
 
                     {loading ? (
                         <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text-muted)' }}>
@@ -274,20 +274,20 @@ export default function AnalyticsDashboard() {
                             <div className={styles.statValue}>
                                 {mostDone ? mostDone.title : 'N/A'}
                             </div>
-                            {mostDone && <div style={{ fontSize: '0.9rem', color: 'var(--color-text-muted)' }}>{mostDone.completionRate}% completion</div>}
+                            {mostDone && <div className="text-meta" style={{ color: 'var(--color-text-muted)' }}>{mostDone.completionRate}% completion</div>}
                         </div>
                         <div className={styles.statCard}>
                             <div className={styles.statTitle} style={{ color: 'var(--color-danger)' }}>Least Done</div>
                             <div className={styles.statValue}>
                                 {leastDone ? leastDone.title : 'N/A'}
                             </div>
-                            {leastDone && <div style={{ fontSize: '0.9rem', color: 'var(--color-text-muted)' }}>{leastDone.completionRate}% completion</div>}
+                            {leastDone && <div className="text-meta" style={{ color: 'var(--color-text-muted)' }}>{leastDone.completionRate}% completion</div>}
                         </div>
                     </div>
 
                     <div className={styles.taskListContainer}>
                         <div className={styles.taskListHeader} onClick={() => setIsListExpanded(!isListExpanded)} style={{ cursor: 'pointer' }}>
-                            <span>Regular Task Performance</span>
+                            <span className="text-heading">Regular Task Performance</span>
                             <ChevronDown
                                 size={20}
                                 style={{

@@ -65,7 +65,7 @@ const CategorySection = memo(({
                             }}
                         />
                     </div>
-                    <span className={styles.barCount}>{stat.completed}/{stat.total}</span>
+                    <span className={`${styles.barCount} text-meta`}>{stat.completed}/{stat.total}</span>
                 </div>
                 <div className={styles.progressTrack}>
                     <div
@@ -149,8 +149,8 @@ export default function DayColumn({ date, tasks, onToggleTask, style }: DayColum
     return (
         <div className={clsx(styles.column, isCurrentDay && styles.today)} style={style}>
             <div className={styles.header}>
-                <span className={styles.dayName}>{dayName}</span>
-                <span className={styles.date}>{dateStr}</span>
+                <span className={`${styles.dayName} text-heading`}>{dayName}</span>
+                <span className={`${styles.date} text-heading`}>{dateStr}</span>
             </div>
 
             <div className={styles.content}>
@@ -164,7 +164,7 @@ export default function DayColumn({ date, tasks, onToggleTask, style }: DayColum
                     />
                 ))}
 
-                <div className={styles.quote}>
+                <div className={`${styles.quote} text-caption`}>
                     {quotes[quoteIndex]}
                 </div>
             </div>

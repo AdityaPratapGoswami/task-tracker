@@ -26,6 +26,16 @@
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   --radius-md: 0.5rem;
   --radius-lg: 0.75rem;
+  /* Typography System */
+  --font-size-2xl: 32px;
+  --font-size-xl: 20px;
+  --font-size-base: 16px;
+  --font-size-sm: 13px;
+  --font-size-xs: 12px;
+
+  --font-weight-bold: 700;
+  --font-weight-semibold: 600;
+  --font-weight-regular: 400;
 }
 
 * {
@@ -35,7 +45,7 @@
 }
 
 body {
-  font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 
   /* Global App Background */
   background-color: #f3f4f6;
@@ -114,7 +124,7 @@ a {
   padding: 0 1.25rem;
   border-radius: 9999px;
   /* Pill shape */
-  font-weight: 500;
+  font-weight: 600;
   font-size: 0.95rem;
   line-height: 1;
   cursor: pointer;
@@ -181,4 +191,45 @@ a {
 
 .mb-2 {
   margin-bottom: 0.5rem;
+}
+
+/* Typography Utilities */
+.text-title {
+  font-size: var(--font-size-2xl);
+  /* 32px */
+  font-weight: var(--font-weight-bold);
+  /* 700 */
+  letter-spacing: -0.02em;
+}
+
+.text-heading {
+  font-size: var(--font-size-xl);
+  /* 20px */
+  font-weight: var(--font-weight-semibold);
+  /* 600 */
+  letter-spacing: -0.01em;
+}
+
+.text-body {
+  font-size: var(--font-size-base);
+  /* 16px */
+  font-weight: var(--font-weight-regular);
+  /* 400 */
+}
+
+.text-meta {
+  font-size: var(--font-size-sm);
+  /* 13px */
+  font-weight: var(--font-weight-regular);
+  /* 400 */
+  opacity: 0.7;
+  /* Reduced opacity */
+}
+
+.text-caption {
+  font-size: var(--font-size-xs);
+  /* 12px */
+  font-weight: var(--font-weight-regular);
+  /* 400 */
+  opacity: 0.6;
 }

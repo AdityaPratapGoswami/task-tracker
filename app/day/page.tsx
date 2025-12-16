@@ -1,13 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { format } from 'date-fns';
+import { format, addDays, subDays } from 'date-fns';
 import { ITask } from '@/models/Task';
 import NavBar from '@/components/NavBar';
 // import Link from 'next/link';
 import DayColumn from '@/components/DayColumn';
 import AddTaskModal from '@/components/AddTaskModal';
-import { Plus, Save, User } from 'lucide-react';
+import { Plus, Save, User, ChevronLeft, ChevronRight } from 'lucide-react';
 import DayViewContentSkeleton, { DayViewJournalSkeleton } from '@/components/DayViewContentSkeleton';
 import styles from './page.module.css';
 
@@ -40,11 +40,24 @@ export default function DayView() {
         }
     }, [currentDate]);
 
+    const handlePrevDay = () => {
+        if (currentDate) {
+            setCurrentDate(subDays(currentDate, 1));
+        }
+    };
+
+    const handleNextDay = () => {
+        if (currentDate) {
+            setCurrentDate(addDays(currentDate, 1));
+        }
+    };
+
     const fetchTasks = async () => {
+        if (!currentDate) return;
         setLoading(true);
         try {
-            const todayStr = format(new Date(), 'yyyy-MM-dd');
-            const res = await fetch(`/api/tasks?startDate=${todayStr}&endDate=${todayStr}`);
+            const dateStr = format(currentDate, 'yyyy-MM-dd');
+            const res = await fetch(`/api/tasks?startDate=${dateStr}&endDate=${dateStr}`);
 
             if (res.ok) {
                 const data: ITask[] = await res.json();
@@ -52,14 +65,14 @@ export default function DayView() {
                 const regularTasks = data.filter(t => t.type === 'regular');
                 const spontaneousTasks = data.filter(t => t.type === 'spontaneous');
 
-                const daysSpontaneous = spontaneousTasks.filter(t => t.date === todayStr);
+                const daysSpontaneous = spontaneousTasks.filter(t => t.date === dateStr);
                 processedTasks.push(...daysSpontaneous);
 
                 regularTasks.forEach(regTask => {
-                    const isCompletedForDay = regTask.completedDates?.includes(todayStr) || false;
+                    const isCompletedForDay = regTask.completedDates?.includes(dateStr) || false;
                     processedTasks.push({
                         ...regTask,
-                        date: todayStr,
+                        date: dateStr,
                         isCompleted: isCompletedForDay
                     });
                 });
@@ -74,26 +87,31 @@ export default function DayView() {
     };
 
     const fetchGratitude = async () => {
+        if (!currentDate) return;
         try {
-            const todayStr = format(new Date(), 'yyyy-MM-dd');
-            const res = await fetch(`/api/gratitude?date=${todayStr}`);
+            const dateStr = format(currentDate, 'yyyy-MM-dd');
+            const res = await fetch(`/api/gratitude?date=${dateStr}`);
             if (res.ok) {
                 const data = await res.json();
                 setGratitude(data.content || '');
+            } else {
+                setGratitude(''); // Reset if no data found/error (likely 404 for empty)
             }
         } catch (error) {
             console.error('Failed to fetch gratitude', error);
+            setGratitude('');
         }
     };
 
     const saveGratitude = async () => {
+        if (!currentDate) return;
         setIsSavingGratitude(true);
         try {
-            const todayStr = format(new Date(), 'yyyy-MM-dd');
+            const dateStr = format(currentDate, 'yyyy-MM-dd');
             const res = await fetch('/api/gratitude', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ date: todayStr, content: gratitude }),
+                body: JSON.stringify({ date: dateStr, content: gratitude }),
             });
             if (!res.ok) {
                 const err = await res.json();
@@ -111,26 +129,31 @@ export default function DayView() {
     };
 
     const fetchJournal = async () => {
+        if (!currentDate) return;
         try {
-            const todayStr = format(new Date(), 'yyyy-MM-dd');
-            const res = await fetch(`/api/journal?date=${todayStr}`);
+            const dateStr = format(currentDate, 'yyyy-MM-dd');
+            const res = await fetch(`/api/journal?date=${dateStr}`);
             if (res.ok) {
                 const data = await res.json();
                 setJournal(data.content || '');
+            } else {
+                setJournal('');
             }
         } catch (error) {
             console.error('Failed to fetch journal', error);
+            setJournal('');
         }
     };
 
     const saveJournal = async () => {
+        if (!currentDate) return;
         setIsSavingJournal(true);
         try {
-            const todayStr = format(new Date(), 'yyyy-MM-dd');
+            const dateStr = format(currentDate, 'yyyy-MM-dd');
             await fetch('/api/journal', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ date: todayStr, content: journal }),
+                body: JSON.stringify({ date: dateStr, content: journal }),
             });
         } catch (error) {
             console.error('Failed to save journal', error);
@@ -140,7 +163,8 @@ export default function DayView() {
     };
 
     const handleToggleTask = async (id: string, isCompleted: boolean) => {
-        const todayStr = format(new Date(), 'yyyy-MM-dd');
+        if (!currentDate) return;
+        const dateStr = format(currentDate, 'yyyy-MM-dd');
         setTasks(prev => prev.map(t => {
             if (t._id === id) {
                 return { ...t, isCompleted };
@@ -152,7 +176,7 @@ export default function DayView() {
             const body: any = { isCompleted };
             const task = tasks.find(t => t._id === id);
             if (task && task.type === 'regular') {
-                body.toggleDate = todayStr;
+                body.toggleDate = dateStr;
             }
 
             await fetch(`/api/tasks/${id}`, {
@@ -167,7 +191,8 @@ export default function DayView() {
     };
 
     const handleAddTask = async (taskData: { title: string; category: string }) => {
-        const dateStr = format(new Date(), 'yyyy-MM-dd');
+        if (!currentDate) return;
+        const dateStr = format(currentDate, 'yyyy-MM-dd');
 
         // Optimistic Update
         const tempId = `temp-${Date.now()}`;
@@ -212,31 +237,31 @@ export default function DayView() {
     return (
         <div className={styles.container}>
             <div className={styles.contentWrapper}>
-                <NavBar />
+
                 <div className={styles.header}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                         <h1 className={styles.title}>Day View</h1>
                         <button
                             onClick={() => setIsModalOpen(true)}
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                background: 'var(--color-white)',
-                                padding: '0.5rem',
-                                borderRadius: '50%', // Circular button
-                                boxShadow: 'var(--shadow-sm)',
-                                border: '1px solid black',
-                                cursor: 'pointer',
-                                color: 'var(--color-text-main)'
-                            }}
+                            className={styles.glassButton}
                             title="Add Task"
                         >
                             <Plus size={20} />
                         </button>
                     </div>
-                    {/* Navigation moved to NavBar */}
+                    {/* Navigation */}
                 </div>
+
+                {/* Date Navigator */}
+                {currentDate && (
+                    <div className={styles.navigatorContainer}>
+                        <div className={styles.glassControl} style={{ paddingLeft: '1rem', paddingRight: '1rem' }}>
+                            <span className={styles.dateRangeText}>
+                                {format(currentDate, 'EEEE, MMM d, yyyy')}
+                            </span>
+                        </div>
+                    </div>
+                )}
 
                 <AddTaskModal
                     isOpen={isModalOpen}

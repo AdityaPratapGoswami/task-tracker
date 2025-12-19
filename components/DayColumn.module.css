@@ -130,10 +130,13 @@
 .taskListWrapper {
     display: grid;
     grid-template-rows: 0fr;
-    /* Faster duration (0.3s) and opacity transition */
-    transition: grid-template-rows 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+    /* Slower duration (0.5s) for smoother feel */
+    transition: grid-template-rows 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease;
     opacity: 0.5;
-    will-change: grid-template-rows, opacity;
+    /* Removed will-change to avoid memory consumption on dynamic height */
+    /* will-change: grid-template-rows, opacity; */
+    transform: translateZ(0);
+    /* Force GPU layer */
 }
 
 .taskListWrapper.expanded {

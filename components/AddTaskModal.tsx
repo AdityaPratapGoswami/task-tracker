@@ -12,13 +12,15 @@ interface Category {
 interface AddTaskModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onAdd: (task: { title: string; category: string }) => Promise<void>;
-    defaultCategory?: string; // New optional prop
+    onSave: (task: { title: string; category: string; points: 1 | 2 | 3 }, id?: string) => Promise<void>;
+    defaultCategory?: string;
+    taskToEdit?: { _id: string; title: string; category: string; points: number } | null;
 }
 
-export default function AddTaskModal({ isOpen, onClose, onAdd, defaultCategory }: AddTaskModalProps) {
+export default function AddTaskModal({ isOpen, onClose, onSave, defaultCategory, taskToEdit }: AddTaskModalProps) {
     const [title, setTitle] = useState('');
     const [category, setCategory] = useState(defaultCategory || '');
+    const [points, setPoints] = useState<1 | 2 | 3>(1);
     const [newCategory, setNewCategory] = useState('');
     const [categories, setCategories] = useState<Category[]>([]);
     const [isCreatingCategory, setIsCreatingCategory] = useState(false);
@@ -27,12 +29,21 @@ export default function AddTaskModal({ isOpen, onClose, onAdd, defaultCategory }
     useEffect(() => {
         if (isOpen) {
             fetchCategories();
-            setTitle('');
-            setCategory(defaultCategory || '');
+            if (taskToEdit) {
+                setTitle(taskToEdit.title);
+                setCategory(taskToEdit.category);
+                // Ensure points is valid, default to 1 if not 1/2/3 (though it should be)
+                const p = taskToEdit.points;
+                setPoints((p === 1 || p === 2 || p === 3) ? p : 1);
+            } else {
+                setTitle('');
+                setCategory(defaultCategory || '');
+                setPoints(1);
+            }
             setNewCategory('');
             setIsCreatingCategory(false);
         }
-    }, [isOpen, defaultCategory]);
+    }, [isOpen, defaultCategory, taskToEdit]);
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -89,7 +100,7 @@ export default function AddTaskModal({ isOpen, onClose, onAdd, defaultCategory }
                 return;
             }
 
-            await onAdd({ title, category: finalCategory });
+            await onSave({ title, category: finalCategory, points }, taskToEdit?._id);
             onClose();
         } catch (error) {
             console.error('Failed to add task', error);
@@ -104,7 +115,7 @@ export default function AddTaskModal({ isOpen, onClose, onAdd, defaultCategory }
         <div className={styles.overlay}>
             <div className={styles.modal}>
                 <div className={styles.header}>
-                    <h2 className={styles.title}>Add New Task</h2>
+                    <h2 className={styles.title}>{taskToEdit ? 'Edit Task' : 'Add New Task'}</h2>
                     <button onClick={onClose} className={styles.btnIcon}>
                         <X size={24} />
                     </button>
@@ -171,12 +182,29 @@ export default function AddTaskModal({ isOpen, onClose, onAdd, defaultCategory }
                         )}
                     </div>
 
+                    <div className={styles.formGroup}>
+                        <label className={styles.label}>Points</label>
+                        <div style={{ display: 'flex', gap: '1rem' }}>
+                            {([1, 2, 3] as const).map((p) => (
+                                <button
+                                    key={p}
+                                    type="button"
+                                    className={`${styles.btn} ${points === p ? styles.submitBtn : styles.cancelBtn}`}
+                                    onClick={() => setPoints(p)}
+                                    style={{ flex: 1 }}
+                                >
+                                    {p}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
                     <div className={styles.actions}>
                         <button type="button" className={`${styles.btn} ${styles.cancelBtn}`} onClick={onClose}>
                             Cancel
                         </button>
                         <button type="submit" className={`${styles.btn} ${styles.submitBtn}`} disabled={loading}>
-                            {loading ? 'Adding...' : 'Add Task'}
+                            {loading ? 'Saving...' : (taskToEdit ? 'Update Task' : 'Add Task')}
                         </button>
                     </div>
                 </form>

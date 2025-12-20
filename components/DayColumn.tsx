@@ -12,6 +12,7 @@ interface DayColumnProps {
     date: Date;
     tasks: ITask[];
     onToggleTask: (id: string, isCompleted: boolean) => void;
+    onEdit: (task: ITask) => void;
     style?: React.CSSProperties;
 }
 
@@ -37,12 +38,14 @@ const CategorySection = memo(({
     stat,
     isExpanded,
     onToggle,
-    onToggleTask
+    onToggleTask,
+    onEdit
 }: {
     stat: CategoryStat;
     isExpanded: boolean;
     onToggle: (key: string) => void;
     onToggleTask: (id: string, isCompleted: boolean) => void;
+    onEdit: (task: ITask) => void;
 }) => {
     return (
         <div className={clsx(styles.categoryBar, styles[stat.color])}>
@@ -85,6 +88,7 @@ const CategorySection = memo(({
                                     key={task._id as string}
                                     task={task}
                                     onToggle={onToggleTask}
+                                    onEdit={onEdit}
                                 />
                             ))
                         ) : (
@@ -99,7 +103,7 @@ const CategorySection = memo(({
 
 CategorySection.displayName = 'CategorySection';
 
-export default function DayColumn({ date, tasks, onToggleTask, style }: DayColumnProps) {
+export default function DayColumn({ date, tasks, onToggleTask, onEdit, style }: DayColumnProps) {
     const dayName = format(date, 'EEE');
     const dateStr = format(date, 'MMM d');
     const isCurrentDay = isToday(date);
@@ -161,6 +165,7 @@ export default function DayColumn({ date, tasks, onToggleTask, style }: DayColum
                         isExpanded={!!expandedCats[stat.key]}
                         onToggle={toggleCategory}
                         onToggleTask={onToggleTask}
+                        onEdit={onEdit}
                     />
                 ))}
 

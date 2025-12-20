@@ -168,7 +168,7 @@ export default function WeekView({ initialTasks = [], initialGratitudes = [], in
 
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    const handleAddTask = async (taskData: { title: string; category: string }) => {
+    const handleAddTask = async (taskData: { title: string; category: string; points: number }, id?: string) => {
         // Determine the date to use for the new task
         // If "Today" is within the currently viewed week, default to Today.
         // Otherwise (viewing past/future week), default to Monday of that week so it's visible.
@@ -244,7 +244,7 @@ export default function WeekView({ initialTasks = [], initialGratitudes = [], in
                 <AddTaskModal
                     isOpen={isModalOpen}
                     onClose={() => setIsModalOpen(false)}
-                    onAdd={handleAddTask}
+                    onSave={handleAddTask}
                 />
 
                 {!currentDate || loading ? (
@@ -279,6 +279,10 @@ export default function WeekView({ initialTasks = [], initialGratitudes = [], in
                                                     date={day}
                                                     tasks={dayTasks}
                                                     onToggleTask={(id, isCompleted) => handleToggleTask(id, isCompleted, dateStr)}
+                                                    onEdit={(task) => {
+                                                        console.log('Edit task from WeekView not fully implemented yet', task);
+                                                        // Future: handle edit in WeekView similar to DayView
+                                                    }}
                                                 />
                                             );
                                         })
@@ -298,6 +302,9 @@ export default function WeekView({ initialTasks = [], initialGratitudes = [], in
                                         date={day}
                                         tasks={dayTasks}
                                         onToggleTask={(id, isCompleted) => handleToggleTask(id, isCompleted, dateStr)}
+                                        onEdit={(task) => {
+                                            console.log('Edit task from WeekView not fully implemented yet', task);
+                                        }}
                                     />
                                 );
                             })}

@@ -9,6 +9,7 @@ export interface ITaskBase {
     completedDates: string[]; // For regular tasks: list of YYYY-MM-DD
     date: string; // YYYY-MM-DD (Creation date for Regular, Due date for Spontaneous)
     endDate?: string; // YYYY-MM-DD (End date for Regular tasks, inclusive)
+    points: 1 | 2 | 3; // Points for the task
 }
 
 export interface ITask extends ITaskBase {
@@ -32,6 +33,7 @@ const TaskSchema: Schema = new Schema(
         completedDates: { type: [String], default: [] },
         date: { type: String, required: true, index: true },
         endDate: { type: String },
+        points: { type: Number, enum: [1, 2, 3], default: 1 },
     },
     {
         timestamps: true,
@@ -44,8 +46,8 @@ TaskSchema.index({ userId: 1, type: 1, endDate: 1 });
 
 // Prevent recompilation of model in development
 // Fix for stale model in dev mode: check if schema has userId
-if (mongoose.models.Task && !mongoose.models.Task.schema.paths.userId) {
-    console.log('Detected stale Task model (missing userId). Deleting from cache.');
+if (mongoose.models.Task && (!mongoose.models.Task.schema.paths.userId || !mongoose.models.Task.schema.paths.points)) {
+    console.log('Detected stale Task model (missing fields). Deleting from cache.');
     delete mongoose.models.Task;
 }
 

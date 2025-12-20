@@ -286,14 +286,14 @@ export default function ProfilePage() {
                 <AddTaskModal
                     isOpen={isRegularModalOpen}
                     onClose={() => setIsRegularModalOpen(false)}
-                    onAdd={handleAddRegularTask}
+                    onSave={handleAddRegularTask}
                     defaultCategory={selectedCategory}
                 />
 
                 <AddTaskModal
                     isOpen={isSpontaneousModalOpen}
                     onClose={() => setIsSpontaneousModalOpen(false)}
-                    onAdd={handleAddSpontaneousTask}
+                    onSave={handleAddSpontaneousTask}
                 />
             </div>
         </div>

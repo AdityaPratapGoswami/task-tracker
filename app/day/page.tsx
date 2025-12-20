@@ -16,6 +16,7 @@ export default function DayView() {
     const [loading, setLoading] = useState(true);
     const [currentDate, setCurrentDate] = useState<Date | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [taskToEdit, setTaskToEdit] = useState<ITask | null>(null);
 
     // Gratitude State
     const [gratitude, setGratitude] = useState('');
@@ -190,48 +191,85 @@ export default function DayView() {
         }
     };
 
-    const handleAddTask = async (taskData: { title: string; category: string }) => {
+    const handleSaveTask = async (taskData: { title: string; category: string; points: 1 | 2 | 3 }, id?: string) => {
         if (!currentDate) return;
         const dateStr = format(currentDate, 'yyyy-MM-dd');
 
-        // Optimistic Update
-        const tempId = `temp-${Date.now()}`;
-        const tempTask: any = {
-            _id: tempId,
-            title: taskData.title,
-            category: taskData.category,
-            type: 'spontaneous',
-            date: dateStr,
-            isCompleted: false,
-            userId: 'temp-user',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            completedDates: []
-        };
+        if (id) {
+            // Edit Mode
+            // Optimistic Update
+            const originalTask = tasks.find(t => t._id === id);
+            if (!originalTask) return;
 
-        setTasks(prev => [...prev, tempTask]);
+            const updatedTask = { ...originalTask, ...taskData };
+            setTasks(prev => prev.map(t => t._id === id ? updatedTask : t));
 
-        try {
-            const res = await fetch('/api/tasks', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    ...taskData,
-                    date: dateStr,
-                    isCompleted: false
-                }),
-            });
+            try {
+                const res = await fetch(`/api/tasks/${id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(taskData),
+                });
 
-            if (res.ok) {
-                const savedTask = await res.json();
-                setTasks(prev => prev.map(t => t._id === tempId ? savedTask : t));
-            } else {
+                if (res.ok) {
+                    const saved = await res.json();
+                    setTasks(prev => prev.map(t => t._id === id ? saved : t));
+                } else {
+                    // Revert
+                    setTasks(prev => prev.map(t => t._id === id ? originalTask : t));
+                }
+            } catch (error) {
+                console.error('Failed to update task', error);
+                setTasks(prev => prev.map(t => t._id === id ? originalTask : t));
+            }
+        } else {
+            // Add Mode
+            // Optimistic Update
+            const tempId = `temp-${Date.now()}`;
+            const tempTask: any = {
+                _id: tempId,
+                title: taskData.title,
+                category: taskData.category,
+                points: taskData.points,
+                type: 'spontaneous',
+                date: dateStr,
+                isCompleted: false,
+                userId: 'temp-user',
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                completedDates: []
+            };
+
+            setTasks(prev => [...prev, tempTask]);
+
+            try {
+                const res = await fetch('/api/tasks', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        ...taskData,
+                        date: dateStr,
+                        isCompleted: false
+                    }),
+                });
+
+                if (res.ok) {
+                    const savedTask = await res.json();
+                    setTasks(prev => prev.map(t => t._id === tempId ? savedTask : t));
+                } else {
+                    setTasks(prev => prev.filter(t => t._id !== tempId));
+                }
+            } catch (error) {
+                console.error('Failed to create task', error);
                 setTasks(prev => prev.filter(t => t._id !== tempId));
             }
-        } catch (error) {
-            console.error('Failed to create task', error);
-            setTasks(prev => prev.filter(t => t._id !== tempId));
         }
+        setTaskToEdit(null);
+    };
+
+    const handleEditTask = (task: ITask) => {
+        setTaskToEdit(task);
+        setIsModalOpen(true);
     };
 
     return (
@@ -242,7 +280,10 @@ export default function DayView() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                         <h1 className={styles.title}>Day View</h1>
                         <button
-                            onClick={() => setIsModalOpen(true)}
+                            onClick={() => {
+                                setTaskToEdit(null);
+                                setIsModalOpen(true);
+                            }}
                             className={styles.glassButton}
                             title="Add Task"
                         >
@@ -265,8 +306,12 @@ export default function DayView() {
 
                 <AddTaskModal
                     isOpen={isModalOpen}
-                    onClose={() => setIsModalOpen(false)}
-                    onAdd={handleAddTask}
+                    onClose={() => {
+                        setIsModalOpen(false);
+                        setTaskToEdit(null);
+                    }}
+                    onSave={handleSaveTask}
+                    taskToEdit={taskToEdit}
                 />
 
                 {loading || !currentDate ? (
@@ -331,6 +376,7 @@ export default function DayView() {
                                     date={currentDate}
                                     tasks={tasks}
                                     onToggleTask={handleToggleTask}
+                                    onEdit={handleEditTask}
                                     style={{ flex: 1 }}
                                 />
                             </div>

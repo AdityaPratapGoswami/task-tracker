@@ -4,11 +4,10 @@ import { useState, useEffect } from 'react';
 import styles from './page.module.css';
 import sharedStyles from '@/components/WeekView.module.css'; // For background grid
 import { ITask } from '@/models/Task';
-import { User, Calendar, Zap, Trash2, Plus, ChevronDown, LogOut } from 'lucide-react';
+import { User, Calendar, Zap, Trash2, Plus, ChevronDown, LogOut, Pencil } from 'lucide-react';
 import AddTaskModal from '@/components/AddTaskModal';
 import { format } from 'date-fns';
 import Link from 'next/link';
-import NavBar from '@/components/NavBar';
 
 import { useAuth } from '@/context/AuthContext';
 
@@ -20,6 +19,7 @@ export default function ProfilePage() {
     const [selectedCategory, setSelectedCategory] = useState<string>(''); // For adding tasks to specific category
     const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
     const [isSpontaneousModalOpen, setIsSpontaneousModalOpen] = useState(false);
+    const [taskToEdit, setTaskToEdit] = useState<ITask | null>(null);
 
     useEffect(() => {
         fetchTasks();
@@ -40,45 +40,67 @@ export default function ProfilePage() {
         }
     };
 
-    const handleAddRegularTask = async (taskData: { title: string; category: string }) => {
+    const handleSaveRegularTask = async (taskData: { title: string; category: string; points: 1 | 2 | 3 }, id?: string) => {
         try {
             const today = format(new Date(), 'yyyy-MM-dd');
-            const res = await fetch('/api/tasks', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    ...taskData,
-                    type: 'regular',
-                    date: today, // Creation date
-                    isCompleted: false
-                }),
-            });
+            let res;
+            if (id) {
+                res = await fetch(`/api/tasks/${id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(taskData),
+                });
+            } else {
+                res = await fetch('/api/tasks', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        ...taskData,
+                        type: 'regular',
+                        date: today, // Creation date
+                        isCompleted: false
+                    }),
+                });
+            }
+
             if (res.ok) {
                 fetchTasks();
+                setTaskToEdit(null);
             }
         } catch (error) {
-            console.error('Failed to add regular task', error);
+            console.error('Failed to save regular task', error);
         }
     };
 
-    const handleAddSpontaneousTask = async (taskData: { title: string; category: string }) => {
+    const handleSaveSpontaneousTask = async (taskData: { title: string; category: string; points: 1 | 2 | 3 }, id?: string) => {
         try {
             const today = format(new Date(), 'yyyy-MM-dd');
-            const res = await fetch('/api/tasks', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    ...taskData,
-                    type: 'spontaneous',
-                    date: today,
-                    isCompleted: false
-                }),
-            });
+            let res;
+            if (id) {
+                res = await fetch(`/api/tasks/${id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(taskData),
+                });
+            } else {
+                res = await fetch('/api/tasks', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        ...taskData,
+                        type: 'spontaneous',
+                        date: today,
+                        isCompleted: false
+                    }),
+                });
+            }
+
             if (res.ok) {
                 fetchTasks();
+                setTaskToEdit(null);
             }
         } catch (error) {
-            console.error('Failed to add spontaneous task', error);
+            console.error('Failed to save spontaneous task', error);
         }
     };
 
@@ -104,6 +126,18 @@ export default function ProfilePage() {
             }
             return newSet;
         });
+    };
+
+    const openEditRegularTask = (task: ITask, e: React.MouseEvent) => {
+        e.stopPropagation();
+        setTaskToEdit(task);
+        setSelectedCategory(task.category);
+        setIsRegularModalOpen(true);
+    };
+
+    const openEditSpontaneousTask = (task: ITask) => {
+        setTaskToEdit(task);
+        setIsSpontaneousModalOpen(true);
     };
 
     return (
@@ -203,6 +237,7 @@ export default function ProfilePage() {
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     setSelectedCategory(category);
+                                                    setTaskToEdit(null);
                                                     setIsRegularModalOpen(true);
                                                 }}
                                             >
@@ -221,11 +256,32 @@ export default function ProfilePage() {
                                                 {tasks.map(task => (
                                                     <div key={task._id} className={styles.taskItem} style={{ marginBottom: '0.5rem' }}>
                                                         <div className={styles.taskInfo}>
-                                                            <span className={styles.taskTitle}>{task.title}</span>
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                                <span className={styles.taskTitle}>{task.title}</span>
+                                                                <span style={{
+                                                                    fontSize: '0.75rem',
+                                                                    backgroundColor: '#f1f5f9',
+                                                                    color: '#64748b',
+                                                                    padding: '0.1rem 0.4rem',
+                                                                    borderRadius: '4px',
+                                                                    fontWeight: 500
+                                                                }}>
+                                                                    {task.points || 1} pts
+                                                                </span>
+                                                            </div>
                                                         </div>
-                                                        <button className={styles.deleteBtn} onClick={() => handleDeleteTask(task._id)}>
-                                                            <Trash2 size={18} />
-                                                        </button>
+                                                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                            <button
+                                                                className={styles.deleteBtn}
+                                                                style={{ color: '#3b82f6' }}
+                                                                onClick={(e) => openEditRegularTask(task, e)}
+                                                            >
+                                                                <Pencil size={18} />
+                                                            </button>
+                                                            <button className={styles.deleteBtn} onClick={() => handleDeleteTask(task._id)}>
+                                                                <Trash2 size={18} />
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                 ))}
                                             </div>
@@ -240,6 +296,7 @@ export default function ProfilePage() {
                             style={{ marginTop: '0.5rem', width: '100%', border: '1px dashed #cbd5e1', background: 'transparent', color: 'var(--color-text-main)' }}
                             onClick={() => {
                                 setSelectedCategory('');
+                                setTaskToEdit(null);
                                 setIsRegularModalOpen(true);
                             }}
                         >
@@ -262,12 +319,33 @@ export default function ProfilePage() {
                             {spontaneousTasks.map(task => (
                                 <div key={task._id} className={styles.taskItem}>
                                     <div className={styles.taskInfo}>
-                                        <span className={styles.taskTitle}>{task.title}</span>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                            <span className={styles.taskTitle}>{task.title}</span>
+                                            <span style={{
+                                                fontSize: '0.75rem',
+                                                backgroundColor: '#f1f5f9',
+                                                color: '#64748b',
+                                                padding: '0.1rem 0.4rem',
+                                                borderRadius: '4px',
+                                                fontWeight: 500
+                                            }}>
+                                                {task.points || 1} pts
+                                            </span>
+                                        </div>
                                         <span className={styles.taskCategory}>{task.category}</span>
                                     </div>
-                                    <button className={styles.deleteBtn} onClick={() => handleDeleteTask(task._id)}>
-                                        <Trash2 size={18} />
-                                    </button>
+                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                        <button
+                                            className={styles.deleteBtn}
+                                            style={{ color: '#3b82f6' }}
+                                            onClick={() => openEditSpontaneousTask(task)}
+                                        >
+                                            <Pencil size={18} />
+                                        </button>
+                                        <button className={styles.deleteBtn} onClick={() => handleDeleteTask(task._id)}>
+                                            <Trash2 size={18} />
+                                        </button>
+                                    </div>
                                 </div>
                             ))}
                         </div>
@@ -275,7 +353,10 @@ export default function ProfilePage() {
                         <button
                             className="btn"
                             style={{ marginTop: '1rem', width: '100%', backgroundColor: 'var(--color-success)' }}
-                            onClick={() => setIsSpontaneousModalOpen(true)}
+                            onClick={() => {
+                                setTaskToEdit(null);
+                                setIsSpontaneousModalOpen(true);
+                            }}
                         >
                             <Plus size={18} style={{ marginRight: '0.5rem' }} />
                             Add Spontaneous Task
@@ -285,15 +366,23 @@ export default function ProfilePage() {
 
                 <AddTaskModal
                     isOpen={isRegularModalOpen}
-                    onClose={() => setIsRegularModalOpen(false)}
-                    onSave={handleAddRegularTask}
+                    onClose={() => {
+                        setIsRegularModalOpen(false);
+                        setTaskToEdit(null);
+                    }}
+                    onSave={handleSaveRegularTask}
                     defaultCategory={selectedCategory}
+                    taskToEdit={taskToEdit}
                 />
 
                 <AddTaskModal
                     isOpen={isSpontaneousModalOpen}
-                    onClose={() => setIsSpontaneousModalOpen(false)}
-                    onSave={handleAddSpontaneousTask}
+                    onClose={() => {
+                        setIsSpontaneousModalOpen(false);
+                        setTaskToEdit(null);
+                    }}
+                    onSave={handleSaveSpontaneousTask}
+                    taskToEdit={taskToEdit}
                 />
             </div>
         </div>

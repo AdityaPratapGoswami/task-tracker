@@ -73,7 +73,7 @@ export default function WeekSummary({ days, tasks, gratitudes, journals }: WeekS
                         <thead>
                             <tr>
                                 <th>Day</th>
-                                <th>Tasks Done</th>
+                                <th>Points Earned</th>
                                 <th>Gratitude Entry</th>
                                 <th>Journal Entry</th>
                             </tr>
@@ -85,9 +85,9 @@ export default function WeekSummary({ days, tasks, gratitudes, journals }: WeekS
 
                                 // Filter data for this day
                                 const dayTasks = tasks.filter(t => t.date === dateStr);
-                                const completedCount = dayTasks.filter(t => t.isCompleted).length;
-                                const totalCount = dayTasks.length;
-                                const percentage = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+                                const totalPoints = dayTasks.reduce((sum, t) => sum + (t.points || 1), 0);
+                                const completedPoints = dayTasks.reduce((sum, t) => t.isCompleted ? sum + (t.points || 1) : sum, 0);
+                                const percentage = totalPoints > 0 ? Math.round((completedPoints / totalPoints) * 100) : 0;
 
                                 // Determine bar color matched to Day View logic
                                 let barColor = '#EF4444'; // Red (< 33%)
@@ -108,7 +108,7 @@ export default function WeekSummary({ days, tasks, gratitudes, journals }: WeekS
                                         </td>
                                         <td className={styles.tasksCell}>
                                             <div className={styles.progressText}>
-                                                {completedCount}/{totalCount}
+                                                {completedPoints}/{totalPoints} pts
                                             </div>
                                             <div className={styles.progressBarBg}>
                                                 <div

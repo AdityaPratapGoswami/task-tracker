@@ -25,6 +25,7 @@ interface ITask {
     completedDates: string[];
     date: string;
     endDate?: string;
+    points?: 1 | 2 | 3;
 }
 
 interface DailyStats {
@@ -105,25 +106,23 @@ export default function AnalyticsDashboard() {
 
             // Count Spontaneous tasks for this day
             const daysSpontaneous = spontaneousTasks.filter(t => t.date === dateStr);
-            dailyTotal += daysSpontaneous.length;
-            dailyCompleted += daysSpontaneous.filter(t => t.isCompleted).length;
+            dailyTotal += daysSpontaneous.reduce((sum, t) => sum + (t.points || 1), 0);
+            dailyCompleted += daysSpontaneous.filter(t => t.isCompleted).reduce((sum, t) => sum + (t.points || 1), 0);
 
             // Count Regular tasks active on this day
             regularTasks.forEach(task => {
                 const isStarted = task.date <= dateStr;
                 const isEnded = task.endDate && task.endDate < dateStr;
                 if (isStarted && !isEnded) {
-                    dailyTotal++;
+                    const points = task.points || 1;
+                    dailyTotal += points;
                     if (task.completedDates?.includes(dateStr)) {
-                        dailyCompleted++;
+                        dailyCompleted += points;
                     }
                 }
             });
 
             // If the day is in the future, return null for percentage to break the line
-            // const percentage = dateStr > todayStr
-            //     ? null
-            //     : (dailyTotal > 0 ? Math.round((dailyCompleted / dailyTotal) * 100) : 0);
             const percentage = dailyTotal > 0 ? Math.round((dailyCompleted / dailyTotal) * 100) : 0;
 
             return {
@@ -163,9 +162,6 @@ export default function AnalyticsDashboard() {
             };
         });
 
-        // Filter out tasks that were not active at all during this week (rate 0 and possibleDays 0 edge case handled by map logic but let's be safe)
-        // Actually showing 0% tasks is requested (Least Done).
-
         // Sort descending by completion rate
         statsMap.sort((a, b) => b.completionRate - a.completionRate);
 
@@ -194,7 +190,7 @@ export default function AnalyticsDashboard() {
                 }}>
                     <p style={{ margin: 0, fontWeight: 600, color: 'var(--color-primary-600)' }}>{data.fullName}</p>
                     <p style={{ margin: '4px 0 0', color: 'var(--color-text-secondary)', fontSize: '0.9rem' }}>
-                        {data.completed}/{data.total} Tasks ({data.percentage}%)
+                        {data.completed}/{data.total} Points ({data.percentage}%)
                     </p>
                 </div>
             );

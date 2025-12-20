@@ -328,9 +328,9 @@ export default function DayView() {
                                 {/* Progress Section */}
                                 <div className={styles.progressSection}>
                                     {(() => {
-                                        const total = tasks.length;
-                                        const completed = tasks.filter(t => t.isCompleted).length;
-                                        const percentage = total === 0 ? 0 : Math.round((completed / total) * 100);
+                                        const totalPoints = tasks.reduce((sum, t) => sum + (t.points || 1), 0);
+                                        const completedPoints = tasks.reduce((sum, t) => t.isCompleted ? sum + (t.points || 1) : sum, 0);
+                                        const percentage = totalPoints === 0 ? 0 : Math.round((completedPoints / totalPoints) * 100);
 
                                         let progressColor = '#EF4444'; // Red (< 33%)
                                         if (percentage >= 33 && percentage <= 66) {
@@ -345,7 +345,7 @@ export default function DayView() {
                                                     <div>
                                                         <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--color-text-main)', marginBottom: '0.25rem' }}>Today's Progress</h3>
                                                         <div style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>
-                                                            {completed} of {total} tasks completed
+                                                            {completedPoints} of {totalPoints} points earned
                                                         </div>
                                                     </div>
                                                     <div style={{ textAlign: 'right' }}>
@@ -353,7 +353,7 @@ export default function DayView() {
                                                             {percentage}%
                                                         </div>
                                                         <div style={{ color: 'var(--color-text-muted)', fontSize: '0.8rem' }}>
-                                                            {total - completed} remaining
+                                                            {totalPoints - completedPoints} pts remaining
                                                         </div>
                                                     </div>
                                                 </div>

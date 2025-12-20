@@ -10,11 +10,12 @@ interface CategoryBlockProps {
     category: string;
     tasks: ITask[];
     onToggleTask: (id: string, isCompleted: boolean) => void;
+    onEdit: (task: ITask) => void;
 }
 
 // CATEGORY_COLORS removed for monochrome theme
 
-export default function CategoryBlock({ category, tasks, onToggleTask }: CategoryBlockProps) {
+export default function CategoryBlock({ category, tasks, onToggleTask, onEdit }: CategoryBlockProps) {
     const [isOpen, setIsOpen] = useState(false);
     // const color = CATEGORY_COLORS[category] || CATEGORY_COLORS.Other; // Removed
 
@@ -42,7 +43,7 @@ export default function CategoryBlock({ category, tasks, onToggleTask }: Categor
             }}>
                 <div className={styles.taskList}>
                     {tasks.map(task => (
-                        <TaskItem key={task._id as string} task={task} onToggle={onToggleTask} />
+                        <TaskItem key={task._id as string} task={task} onToggle={onToggleTask} onEdit={onEdit} />
                     ))}
                 </div>
             </div>

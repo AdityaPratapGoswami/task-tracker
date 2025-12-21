@@ -191,7 +191,7 @@ export default function DayView() {
         }
     };
 
-    const handleSaveTask = async (taskData: { title: string; category: string; points: 1 | 2 | 3 }, id?: string) => {
+    const handleSaveTask = async (taskData: { title: string; category: string; points: 1 | 2 | 3; isImportant: boolean; isUrgent: boolean }, id?: string) => {
         if (!currentDate) return;
         const dateStr = format(currentDate, 'yyyy-MM-dd');
 
@@ -231,6 +231,8 @@ export default function DayView() {
                 title: taskData.title,
                 category: taskData.category,
                 points: taskData.points,
+                isImportant: taskData.isImportant,
+                isUrgent: taskData.isUrgent,
                 type: 'spontaneous',
                 date: dateStr,
                 isCompleted: false,

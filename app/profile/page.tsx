@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import styles from './page.module.css';
 import sharedStyles from '@/components/WeekView.module.css'; // For background grid
 import { ITask } from '@/models/Task';
-import { User, Calendar, Zap, Trash2, Plus, ChevronDown, LogOut, Pencil } from 'lucide-react';
+import { User, Calendar, Zap, Trash2, Plus, ChevronDown, LogOut, Pencil, Star } from 'lucide-react';
 import AddTaskModal from '@/components/AddTaskModal';
 import { format } from 'date-fns';
 import Link from 'next/link';
@@ -40,7 +40,7 @@ export default function ProfilePage() {
         }
     };
 
-    const handleSaveRegularTask = async (taskData: { title: string; category: string; points: 1 | 2 | 3 }, id?: string) => {
+    const handleSaveRegularTask = async (taskData: { title: string; category: string; points: 1 | 2 | 3; isImportant: boolean; isUrgent: boolean }, id?: string) => {
         try {
             const today = format(new Date(), 'yyyy-MM-dd');
             let res;
@@ -72,7 +72,7 @@ export default function ProfilePage() {
         }
     };
 
-    const handleSaveSpontaneousTask = async (taskData: { title: string; category: string; points: 1 | 2 | 3 }, id?: string) => {
+    const handleSaveSpontaneousTask = async (taskData: { title: string; category: string; points: 1 | 2 | 3; isImportant: boolean; isUrgent: boolean }, id?: string) => {
         try {
             const today = format(new Date(), 'yyyy-MM-dd');
             let res;
@@ -268,6 +268,12 @@ export default function ProfilePage() {
                                                                 }}>
                                                                     {task.points || 1} pts
                                                                 </span>
+                                                                {task.isUrgent && (
+                                                                    <Zap size={14} fill="#F97316" color="#F97316" />
+                                                                )}
+                                                                {task.isImportant && (
+                                                                    <Star size={14} fill="#F59E0B" color="#F59E0B" />
+                                                                )}
                                                             </div>
                                                         </div>
                                                         <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -331,6 +337,12 @@ export default function ProfilePage() {
                                             }}>
                                                 {task.points || 1} pts
                                             </span>
+                                            {task.isUrgent && (
+                                                <Zap size={14} fill="#F97316" color="#F97316" />
+                                            )}
+                                            {task.isImportant && (
+                                                <Star size={14} fill="#F59E0B" color="#F59E0B" />
+                                            )}
                                         </div>
                                         <span className={styles.taskCategory}>{task.category}</span>
                                     </div>

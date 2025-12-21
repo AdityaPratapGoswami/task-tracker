@@ -168,7 +168,7 @@ export default function WeekView({ initialTasks = [], initialGratitudes = [], in
 
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    const handleAddTask = async (taskData: { title: string; category: string; points: number }, id?: string) => {
+    const handleAddTask = async (taskData: { title: string; category: string; points: 1 | 2 | 3; isImportant: boolean; isUrgent: boolean }, id?: string) => {
         // Determine the date to use for the new task
         // If "Today" is within the currently viewed week, default to Today.
         // Otherwise (viewing past/future week), default to Monday of that week so it's visible.
@@ -186,6 +186,9 @@ export default function WeekView({ initialTasks = [], initialGratitudes = [], in
             _id: tempId,
             title: taskData.title,
             category: taskData.category,
+            points: taskData.points,
+            isImportant: taskData.isImportant,
+            isUrgent: taskData.isUrgent,
             type: 'spontaneous', // Default type for new tasks from modal
             date: dateStr,
             isCompleted: false,

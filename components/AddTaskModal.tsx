@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import styles from './AddTaskModal.module.css';
-import { X } from 'lucide-react';
+import { X, Star, Zap } from 'lucide-react';
 
 interface Category {
     _id: string;
@@ -12,15 +12,17 @@ interface Category {
 interface AddTaskModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSave: (task: { title: string; category: string; points: 1 | 2 | 3 }, id?: string) => Promise<void>;
+    onSave: (task: { title: string; category: string; points: 1 | 2 | 3; isImportant: boolean; isUrgent: boolean }, id?: string) => Promise<void>;
     defaultCategory?: string;
-    taskToEdit?: { _id: string; title: string; category: string; points: number } | null;
+    taskToEdit?: { _id: string; title: string; category: string; points: number; isImportant?: boolean; isUrgent?: boolean } | null;
 }
 
 export default function AddTaskModal({ isOpen, onClose, onSave, defaultCategory, taskToEdit }: AddTaskModalProps) {
     const [title, setTitle] = useState('');
     const [category, setCategory] = useState(defaultCategory || '');
     const [points, setPoints] = useState<1 | 2 | 3>(1);
+    const [isImportant, setIsImportant] = useState(false);
+    const [isUrgent, setIsUrgent] = useState(false);
     const [newCategory, setNewCategory] = useState('');
     const [categories, setCategories] = useState<Category[]>([]);
     const [isCreatingCategory, setIsCreatingCategory] = useState(false);
@@ -35,10 +37,14 @@ export default function AddTaskModal({ isOpen, onClose, onSave, defaultCategory,
                 // Ensure points is valid, default to 1 if not 1/2/3 (though it should be)
                 const p = taskToEdit.points;
                 setPoints((p === 1 || p === 2 || p === 3) ? p : 1);
+                setIsImportant(taskToEdit.isImportant || false);
+                setIsUrgent(taskToEdit.isUrgent || false);
             } else {
                 setTitle('');
                 setCategory(defaultCategory || '');
                 setPoints(1);
+                setIsImportant(false);
+                setIsUrgent(false);
             }
             setNewCategory('');
             setIsCreatingCategory(false);
@@ -100,7 +106,7 @@ export default function AddTaskModal({ isOpen, onClose, onSave, defaultCategory,
                 return;
             }
 
-            await onSave({ title, category: finalCategory, points }, taskToEdit?._id);
+            await onSave({ title, category: finalCategory, points, isImportant, isUrgent }, taskToEdit?._id);
             onClose();
         } catch (error) {
             console.error('Failed to add task', error);
@@ -197,6 +203,27 @@ export default function AddTaskModal({ isOpen, onClose, onSave, defaultCategory,
                                 </button>
                             ))}
                         </div>
+                    </div>
+
+                    <div className={styles.formGroup} style={{ display: 'flex', gap: '1rem' }}>
+                        <button
+                            type="button"
+                            className={`${styles.toggleBtn} ${isImportant ? styles.active : ''}`}
+                            onClick={() => setIsImportant(!isImportant)}
+                            style={{ flex: 1 }}
+                        >
+                            <Star size={18} className={isImportant ? styles.iconActive : ''} fill={isImportant ? "currentColor" : "none"} />
+                            Important
+                        </button>
+                        <button
+                            type="button"
+                            className={`${styles.toggleBtn} ${isUrgent ? styles.active : ''}`}
+                            onClick={() => setIsUrgent(!isUrgent)}
+                            style={{ flex: 1 }}
+                        >
+                            <Zap size={18} className={isUrgent ? styles.iconActive : ''} fill={isUrgent ? "currentColor" : "none"} />
+                            Urgent
+                        </button>
                     </div>
 
                     <div className={styles.actions}>

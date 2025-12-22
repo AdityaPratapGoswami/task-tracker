@@ -55,7 +55,7 @@ export default function AnalyticsDashboard() {
     const [taskStats, setTaskStats] = useState<TaskStat[]>([]);
     const [mostDone, setMostDone] = useState<TaskStat | null>(null);
     const [leastDone, setLeastDone] = useState<TaskStat | null>(null);
-    const [isListExpanded, setIsListExpanded] = useState(true);
+    const [isListExpanded, setIsListExpanded] = useState(false);
     const [selectedQuadrant, setSelectedQuadrant] = useState<string | null>(null);
     const [allFetchedTasks, setAllFetchedTasks] = useState<ITask[]>([]);
 
@@ -388,7 +388,7 @@ export default function AnalyticsDashboard() {
                                         dx={-10}
                                         width={45}
                                     />
-                                    <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'var(--color-grey-300)', strokeWidth: 1, strokeDasharray: '4 4' }} />
+                                    <Tooltip content={<CustomTooltip />} isAnimationActive={false} shared={false} cursor={{ stroke: 'var(--color-grey-300)', strokeWidth: 1, strokeDasharray: '4 4' }} />
                                     <Line
                                         type="monotone"
                                         dataKey="percentage"
@@ -441,7 +441,8 @@ export default function AnalyticsDashboard() {
                                 size={20}
                                 style={{
                                     transform: isListExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-                                    transition: 'transform 0.6s ease'
+                                    transition: 'transform 0.6s ease',
+                                    color: 'var(--color-primary-600)'
                                 }}
                             />
                         </div>

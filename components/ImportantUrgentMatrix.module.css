@@ -1,0 +1,100 @@
+.matrixContainer {
+    width: 100%;
+    margin-bottom: 3rem;
+    padding: 0;
+    /* Removed container background/border to let quadrants float */
+}
+
+.title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--color-text-main);
+    margin-bottom: 1.5rem;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto;
+    gap: 1.5rem;
+    width: 100%;
+}
+
+.quadrant {
+    /* Glassmorphism Styles matching .statCard */
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border-radius: 16px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+
+    /* Layout */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    min-height: 200px;
+}
+
+.quadrant:hover {
+    transform: translateY(-4px);
+    background: rgba(255, 255, 255, 0.6);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+}
+
+.quadrant.selected {
+    background: rgba(255, 255, 255, 0.8);
+    border-color: var(--color-primary-600);
+    box-shadow: 0 0 0 1px var(--color-primary-600), 0 10px 40px rgba(0, 0, 0, 0.1);
+}
+
+/* Quadrant Indicators - Removed to make all cards identical */
+.q1,
+.q2,
+.q3,
+.q4 {
+    border-left: none;
+}
+
+.quadrantTitle {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--color-text-muted);
+    margin-bottom: 0.5rem;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.percentage {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--color-text-main);
+    line-height: 1.2;
+    margin-bottom: 0.25rem;
+}
+
+.stats {
+    display: flex;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+    font-weight: 500;
+}
+
+@media (max-width: 768px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
+
+    .quadrant {
+        padding: 1.5rem;
+        min-height: 160px;
+    }
+}

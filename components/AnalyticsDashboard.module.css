@@ -99,6 +99,8 @@
     width: 100%;
     height: 600px;
     padding: 2rem;
+    margin-bottom: 3rem;
+    /* Standard gap */
 
     /* Glassmorphism from DayColumn */
     background: rgba(255, 255, 255, 0.4);
@@ -108,31 +110,34 @@
     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.5);
     overflow: hidden;
+
+    /* Fix for mobile overflow */
+    display: flex;
+    flex-direction: column;
 }
 
-.title {
+.sectionTitle {
     font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--color-text-main);
     margin-bottom: 1.5rem;
-    color: var(--color-text-main);
 }
 
-.subtitle {
-    font-size: 1.2rem;
-    margin: 2rem 0 1rem;
-    color: var(--color-text-main);
-}
-
+/* Deleting unused .title and .subtitle to avoid confusion if completely replacing usages */
 
 .statsSection {
-    margin-top: 3rem;
+    margin-top: 0;
+    /* Remove top margin, rely on previous element's bottom margin */
     width: 100%;
+    padding-bottom: 3rem;
 }
 
 .statsGrid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     gap: 1.5rem;
-    margin-bottom: 2rem;
+    margin-bottom: 3rem;
+    /* Gap between cards and list */
 }
 
 .statCard {

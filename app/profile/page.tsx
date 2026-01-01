@@ -6,6 +6,7 @@ import sharedStyles from '@/components/WeekView.module.css'; // For background g
 import { ITask } from '@/models/Task';
 import { User, Calendar, Zap, Trash2, Plus, ChevronDown, LogOut, Pencil, Star } from 'lucide-react';
 import AddTaskModal from '@/components/AddTaskModal';
+import OKRSection from '@/components/OKRSection';
 import { format } from 'date-fns';
 import Link from 'next/link';
 
@@ -185,6 +186,9 @@ export default function ProfilePage() {
                     )}
 
                 </div>
+
+
+                <OKRSection className={styles.profileCard} />
 
                 <div className={styles.grid}>
                     {/* Regular Tasks Section */}

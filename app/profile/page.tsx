@@ -7,7 +7,7 @@ import { ITask } from '@/models/Task';
 import { User, Calendar, Zap, Trash2, Plus, ChevronDown, LogOut, Pencil, Star } from 'lucide-react';
 import AddTaskModal from '@/components/AddTaskModal';
 import OKRSection from '@/components/OKRSection';
-import { format } from 'date-fns';
+import { format, addDays } from 'date-fns';
 import Link from 'next/link';
 
 import { useAuth } from '@/context/AuthContext';
@@ -45,6 +45,12 @@ export default function ProfilePage() {
         try {
             const today = format(new Date(), 'yyyy-MM-dd');
             let res;
+            let creationDate = today;
+            // If today is Sunday (0), set the task to start from tomorrow (Monday)
+            if (new Date().getDay() === 0) {
+                creationDate = format(addDays(new Date(), 1), 'yyyy-MM-dd');
+            }
+
             if (id) {
                 res = await fetch(`/api/tasks/${id}`, {
                     method: 'PATCH',
@@ -58,7 +64,7 @@ export default function ProfilePage() {
                     body: JSON.stringify({
                         ...taskData,
                         type: 'regular',
-                        date: today, // Creation date
+                        date: creationDate, // Adjusted creation date
                         isCompleted: false
                     }),
                 });

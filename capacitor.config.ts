@@ -5,8 +5,7 @@ const config: CapacitorConfig = {
   appName: 'Balance',
   webDir: 'out',
   server: {
-    // TODO: Replace with your actual production URL
-    url: 'https://task-tracker-v6xe.vercel.app',
+    url: 'https://task-tracker-sage-alpha.vercel.app',
     cleartext: true
   },
   plugins: {

@@ -1,0 +1,656 @@
+/*
+ * Modernist — the desktop design system.
+ *
+ * Tokens are global (none of these names collide with the legacy mobile
+ * variables in globals.css), but every rule that paints is namespaced `m-`
+ * or scoped to the >=1024px breakpoint, so the existing mobile UI is
+ * untouched by this file.
+ */
+
+:root {
+  --m-bg: #f3f2f2;
+  --m-surface: #eae9e9;
+  --m-text: #201e1d;
+  --m-accent: #ec3013;
+  --m-divider: color-mix(in srgb, #201e1d 40%, transparent);
+
+  --m-neutral-300: #d7d3d3;
+  --m-neutral-400: #bab6b6;
+  --m-neutral-500: #9b9797;
+  --m-neutral-600: #7d7979;
+
+  --m-accent-600: #dd2b0f;
+  --m-accent-700: #ae1800;
+
+  --m-heading: var(--font-archivo), "Archivo", system-ui, sans-serif;
+  --m-body: var(--font-archivo), "Archivo", system-ui, sans-serif;
+}
+
+/*
+ * The legacy mobile theme paints six fixed radial gradients over the whole
+ * page. `background-attachment: fixed` forces a full-viewport repaint on
+ * every scroll frame, which is the single most expensive thing on the page.
+ * Desktop drops it for a flat fill.
+ */
+@media (min-width: 1024px) {
+  body:has(.m-page) {
+    background-image: none;
+    background-color: var(--m-bg);
+    background-attachment: scroll;
+    color: var(--m-text);
+    font-family: var(--m-body);
+    padding-top: 0;
+  }
+}
+
+.m-page {
+  min-height: 100vh;
+  background: var(--m-bg);
+  color: var(--m-text);
+  font-family: var(--m-body);
+  font-size: 15px;
+  line-height: 1.55;
+  padding-bottom: 96px;
+}
+
+.m-page *,
+.m-page *::before,
+.m-page *::after {
+  box-sizing: border-box;
+}
+
+.m-shell {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 56px 48px 0;
+}
+
+/* ── header ───────────────────────────────────────────────────────────── */
+
+.m-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 76px;
+  padding: 0 48px;
+  border-bottom: 2px solid var(--m-divider);
+  background: var(--m-bg);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.m-brandwrap {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+}
+
+.m-brand {
+  font-family: var(--m-heading);
+  font-weight: 800;
+  font-size: 21px;
+  letter-spacing: -0.02em;
+}
+
+.m-nav {
+  display: flex;
+  gap: 36px;
+  align-self: stretch;
+  align-items: center;
+}
+
+.m-tab {
+  position: relative;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  font-family: var(--m-heading);
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--m-text);
+  text-decoration: none;
+}
+
+.m-tab:hover {
+  color: var(--m-accent-700);
+}
+
+.m-tab-mark {
+  position: absolute;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  height: 4px;
+  background: var(--m-accent);
+}
+
+/* ── type ─────────────────────────────────────────────────────────────── */
+
+.m-kicker {
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--m-neutral-600);
+}
+
+.m-label {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--m-neutral-600);
+}
+
+.m-title {
+  font-family: var(--m-heading);
+  font-weight: 800;
+  font-size: 52px;
+  line-height: 1.05;
+  margin: 0;
+  letter-spacing: -0.03em;
+}
+
+.m-h2 {
+  font-family: var(--m-heading);
+  font-weight: 800;
+  font-size: 22px;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.m-pillar {
+  font-family: var(--m-heading);
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--m-accent);
+}
+
+.m-pagehead {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 32px;
+  margin-bottom: 28px;
+}
+
+.m-actions {
+  display: flex;
+  gap: 8px;
+  padding-bottom: 6px;
+  flex: 0 0 auto;
+}
+
+/* ── buttons ──────────────────────────────────────────────────────────── */
+
+.m-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  text-decoration: none;
+  font-family: var(--m-heading);
+  font-weight: 800;
+  font-size: 14px;
+  line-height: 1.2;
+  color: var(--m-text);
+  background: transparent;
+  border: 1px solid transparent;
+  padding: 8px 14px;
+  border-radius: 0;
+  white-space: nowrap;
+}
+
+.m-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.m-btn-primary {
+  background: var(--m-accent);
+  color: var(--m-bg);
+  padding: 8px 18px;
+}
+
+.m-btn-primary:hover {
+  background: var(--m-accent-600);
+}
+
+.m-btn-primary:active {
+  background: var(--m-accent-700);
+}
+
+.m-btn-secondary {
+  border-color: var(--m-divider);
+}
+
+.m-btn-secondary:hover {
+  background: color-mix(in srgb, var(--m-text) 7%, transparent);
+}
+
+.m-btn-ghost {
+  color: var(--m-accent);
+  padding-inline: 4px;
+}
+
+.m-btn-ghost:hover {
+  background: color-mix(in srgb, var(--m-accent) 10%, transparent);
+}
+
+.m-btn-block {
+  width: 100%;
+  justify-content: flex-start;
+  text-align: left;
+  padding: 12px 18px;
+}
+
+.m-page :focus-visible {
+  outline: 2px solid var(--m-accent);
+  outline-offset: 2px;
+}
+
+/* ── forms ────────────────────────────────────────────────────────────── */
+
+.m-input {
+  width: 100%;
+  min-height: 36px;
+  padding: 8px 10px;
+  font: inherit;
+  font-size: 15px;
+  color: var(--m-text);
+  caret-color: var(--m-accent);
+  background: var(--m-surface);
+  border: 1px solid var(--m-divider);
+  border-radius: 0;
+}
+
+.m-input:hover {
+  border-color: color-mix(in srgb, var(--m-text) 45%, transparent);
+}
+
+.m-input:focus-visible {
+  border-color: var(--m-accent);
+  outline-offset: 0;
+}
+
+textarea.m-input {
+  resize: none;
+  font-family: var(--m-body);
+}
+
+/* ── stat strip ───────────────────────────────────────────────────────── */
+
+.m-stats {
+  border-top: 2px solid var(--m-divider);
+  border-bottom: 2px solid var(--m-divider);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.m-stat {
+  padding: 22px 24px;
+  border-left: 2px solid var(--m-divider);
+}
+
+.m-stat:first-child {
+  padding-left: 0;
+  border-left: 0;
+}
+
+.m-stat-value {
+  font-family: var(--m-heading);
+  font-weight: 800;
+  font-size: 34px;
+  letter-spacing: -0.02em;
+  margin-top: 8px;
+}
+
+.m-accent {
+  color: var(--m-accent);
+}
+
+.m-muted {
+  color: var(--m-neutral-500);
+}
+
+/* ── week matrix ──────────────────────────────────────────────────────── */
+
+.m-wgrid {
+  display: grid;
+  grid-template-columns: 260px repeat(7, minmax(0, 1fr)) 76px;
+  align-items: center;
+}
+
+.m-wgrid-head {
+  padding: 18px 0 14px;
+  border-bottom: 2px solid var(--m-divider);
+}
+
+.m-daycol {
+  text-align: center;
+}
+
+.m-daycol-label {
+  font-family: var(--m-heading);
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+}
+
+.m-pillar-rule {
+  grid-column: 2 / -1;
+  height: 1px;
+  background: var(--m-neutral-300);
+}
+
+.m-taskname {
+  font-size: 15px;
+  padding-right: 20px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.m-cellwrap {
+  display: flex;
+  justify-content: center;
+  padding: 0 5px;
+}
+
+.m-cell {
+  width: 100%;
+  height: 22px;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.m-cell-mark {
+  display: block;
+  width: 100%;
+  height: 22px;
+}
+
+.m-cell-done {
+  background: var(--m-text);
+  border: 1px solid var(--m-text);
+}
+
+.m-cell-todo {
+  background: transparent;
+  border: 1px solid var(--m-neutral-400);
+}
+
+.m-cell-future {
+  background: transparent;
+  border: 1px dashed var(--m-neutral-300);
+}
+
+.m-cell:disabled {
+  cursor: default;
+}
+
+.m-score {
+  text-align: right;
+  font-family: var(--m-heading);
+  font-weight: 800;
+  font-size: 14px;
+}
+
+.m-total-row {
+  padding: 20px 0 0;
+  margin-top: 14px;
+  border-top: 2px solid var(--m-divider);
+}
+
+.m-total-pts {
+  font-family: var(--m-heading);
+  font-weight: 800;
+  font-size: 22px;
+}
+
+/* ── day board ────────────────────────────────────────────────────────── */
+
+.m-split {
+  border-top: 2px solid var(--m-divider);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.m-split-left {
+  padding: 36px 48px 48px 0;
+}
+
+.m-split-right {
+  padding: 36px 0 48px 48px;
+  border-left: 2px solid var(--m-divider);
+}
+
+.m-group-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--m-divider);
+}
+
+.m-taskrow {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--m-neutral-300);
+  padding: 14px 4px;
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--m-body);
+  color: var(--m-text);
+}
+
+.m-taskrow:hover {
+  background: color-mix(in srgb, var(--m-text) 4%, transparent);
+}
+
+.m-check {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+  border: 2px solid var(--m-neutral-400);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--m-bg);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.m-check-on {
+  border-color: var(--m-text);
+  background: var(--m-text);
+}
+
+.m-tasklabel {
+  flex: 1;
+  font-size: 16px;
+}
+
+.m-tasklabel-done {
+  color: var(--m-neutral-600);
+  text-decoration: line-through;
+}
+
+.m-pts {
+  font-size: 12px;
+  color: var(--m-neutral-500);
+  letter-spacing: 0.08em;
+}
+
+.m-bigpct {
+  font-family: var(--m-heading);
+  font-weight: 800;
+  font-size: 92px;
+  line-height: 0.9;
+  letter-spacing: -0.045em;
+  color: var(--m-accent);
+}
+
+.m-track {
+  height: 10px;
+  background: var(--m-neutral-300);
+}
+
+.m-fill {
+  height: 100%;
+  background: var(--m-accent);
+}
+
+.m-quote {
+  margin: 0 0 40px;
+  font-size: 17px;
+  line-height: 1.5;
+  text-wrap: pretty;
+  border-left: 4px solid var(--m-accent);
+  padding-left: 18px;
+}
+
+/* ── analytics ────────────────────────────────────────────────────────── */
+
+.m-chart {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 24px;
+  align-items: end;
+  height: 280px;
+  border-bottom: 2px solid var(--m-divider);
+}
+
+.m-chart-col {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  height: 100%;
+}
+
+.m-chart-val {
+  font-family: var(--m-heading);
+  font-weight: 800;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.m-chart-axis {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 24px;
+  padding-top: 12px;
+}
+
+.m-quads {
+  border-top: 2px solid var(--m-divider);
+  border-bottom: 2px solid var(--m-divider);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.m-quad {
+  padding: 32px;
+  border-left: 2px solid var(--m-divider);
+  border-top: 2px solid var(--m-divider);
+  background: none;
+  text-align: left;
+  font-family: var(--m-body);
+  color: var(--m-text);
+  cursor: pointer;
+}
+
+.m-quad:nth-child(-n + 2) {
+  border-top: 0;
+}
+
+.m-quad:nth-child(odd) {
+  padding-left: 0;
+  border-left: 0;
+}
+
+.m-quad:hover {
+  background: color-mix(in srgb, var(--m-text) 4%, transparent);
+}
+
+.m-quad-on {
+  background: color-mix(in srgb, var(--m-accent) 8%, transparent);
+}
+
+.m-quad-value {
+  font-family: var(--m-heading);
+  font-weight: 800;
+  font-size: 46px;
+  letter-spacing: -0.03em;
+}
+
+.m-perf-row {
+  display: grid;
+  grid-template-columns: 260px 1fr 64px;
+  align-items: center;
+  gap: 24px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--m-neutral-300);
+}
+
+.m-thin-track {
+  height: 8px;
+  background: var(--m-neutral-300);
+}
+
+/* ── profile / OKR ────────────────────────────────────────────────────── */
+
+.m-okr {
+  border-top: 2px solid var(--m-divider);
+  padding: 26px 0;
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 48px;
+  align-items: start;
+}
+
+.m-okr-title {
+  font-family: var(--m-heading);
+  font-weight: 800;
+  font-size: 24px;
+  letter-spacing: -0.02em;
+  text-wrap: pretty;
+}
+
+.m-kr {
+  display: grid;
+  grid-template-columns: 1fr 200px 52px;
+  align-items: center;
+  gap: 20px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--m-neutral-300);
+}
+
+.m-listrow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 2px;
+  border-bottom: 1px solid var(--m-neutral-300);
+}
+
+.m-empty {
+  font-size: 14px;
+  color: var(--m-neutral-600);
+  padding: 18px 0;
+}

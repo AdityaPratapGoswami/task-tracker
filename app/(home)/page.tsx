@@ -1,4 +1,4 @@
-import WeekView from '@/components/WeekView';
+import WeekScreen from '@/components/modernist/WeekScreen';
 import { cookies } from 'next/headers';
 import { verifyToken } from '@/lib/auth';
 import connectToDatabase from '@/lib/db';
@@ -12,12 +12,12 @@ async function getData() {
   const token = cookieStore.get('token')?.value;
 
   if (!token) {
-    return { tasks: [], gratitudes: [], journals: [] };
+    return { tasks: [], rawTasks: [], gratitudes: [], journals: [] };
   }
 
   const payload = verifyToken(token);
   if (!payload) {
-    return { tasks: [], gratitudes: [], journals: [] };
+    return { tasks: [], rawTasks: [], gratitudes: [], journals: [] };
   }
 
   await connectToDatabase();
@@ -106,18 +106,22 @@ async function getData() {
 
   return {
     tasks: serialize(processedTasks), // Tasks are already partly processed but need ID stringification
+    // The desktop matrix derives its own per-day state, so it wants the
+    // documents as stored rather than the expanded instances above.
+    rawTasks: serialize(tasksData),
     gratitudes: serialize(gratitudesData),
     journals: serialize(journalsData)
   };
 }
 
 export default async function Home() {
-  const { tasks, gratitudes, journals } = await getData();
+  const { tasks, rawTasks, gratitudes, journals } = await getData();
 
   return (
     <main>
-      <WeekView
+      <WeekScreen
         initialTasks={tasks}
+        initialRawTasks={rawTasks}
         initialGratitudes={gratitudes}
         initialJournals={journals}
       />

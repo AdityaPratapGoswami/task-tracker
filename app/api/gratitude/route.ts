@@ -37,7 +37,7 @@ export async function GET(request: Request) {
         } else {
             return NextResponse.json({ error: 'Date or Date Range required' }, { status: 400 });
         }
-    } catch (error) {
+    } catch {
         return NextResponse.json({ error: 'Failed to fetch gratitude' }, { status: 500 });
     }
 }

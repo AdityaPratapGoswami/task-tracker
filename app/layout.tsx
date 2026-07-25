@@ -41,6 +41,7 @@ export const viewport: Viewport = {
 import { AuthProvider } from "@/context/AuthContext";
 import StatusBarManager from "@/components/StatusBarManager";
 import AppLayout from "@/components/AppLayout";
+import ServiceWorkerCleanup from "@/components/ServiceWorkerCleanup";
 
 export default function RootLayout({
   children,
@@ -53,6 +54,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${archivo.variable}`}>
       <body suppressHydrationWarning>
+        <ServiceWorkerCleanup />
         <AuthProvider>
           <AppLayout>
             {children}

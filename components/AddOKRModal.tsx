@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Plus, Trash2 } from 'lucide-react';
-import { IOKR, IKeyResult } from '@/types/okr';
+import { IOKR } from '@/types/okr';
 import styles from './AddOKRModal.module.css';
 
 interface AddOKRModalProps {

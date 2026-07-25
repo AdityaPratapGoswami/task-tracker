@@ -12,6 +12,7 @@ export interface ITaskBase {
     points: 1 | 2 | 3; // Points for the task
     isImportant: boolean; // Eisenhower Matrix
     isUrgent: boolean; // Eisenhower Matrix
+    isOverdue: boolean; // Spontaneous only: set once it's rolled forward past its original date
 }
 
 export interface ITask extends ITaskBase {
@@ -38,6 +39,7 @@ const TaskSchema: Schema = new Schema(
         points: { type: Number, enum: [1, 2, 3], default: 1 },
         isImportant: { type: Boolean, default: false },
         isUrgent: { type: Boolean, default: false },
+        isOverdue: { type: Boolean, default: false },
     },
     {
         timestamps: true,
@@ -50,7 +52,7 @@ TaskSchema.index({ userId: 1, type: 1, endDate: 1 });
 
 // Prevent recompilation of model in development
 // Fix for stale model in dev mode: check if schema has userId
-if (mongoose.models.Task && (!mongoose.models.Task.schema.paths.userId || !mongoose.models.Task.schema.paths.points || !mongoose.models.Task.schema.paths.isImportant)) {
+if (mongoose.models.Task && (!mongoose.models.Task.schema.paths.userId || !mongoose.models.Task.schema.paths.points || !mongoose.models.Task.schema.paths.isImportant || !mongoose.models.Task.schema.paths.isOverdue)) {
     console.log('Detected stale Task model (missing fields). Deleting from cache.');
     delete mongoose.models.Task;
 }

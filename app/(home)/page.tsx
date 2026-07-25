@@ -1,130 +1,59 @@
+import { startOfWeek, addDays, subDays } from 'date-fns';
 import WeekScreen from '@/components/modernist/WeekScreen';
-import { cookies } from 'next/headers';
-import { verifyToken } from '@/lib/auth';
-import connectToDatabase from '@/lib/db';
-import Task from '@/models/Task';
-import Gratitude from '@/models/Gratitude';
-import Journal from '@/models/Journal';
-import { startOfWeek, addDays, format } from 'date-fns';
+import { getSessionUserId, loadTasksInRange, loadEntriesInRange } from '@/lib/serverData';
+import { MetricTask, dayKey, isActiveOn, isDoneOn, WEEK_HISTORY_DAYS } from '@/lib/metrics';
 
-async function getData() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get('token')?.value;
+/**
+ * The legacy mobile week view expects one task object per day, with `date` and
+ * `isCompleted` already resolved for that day. The desktop matrix derives that
+ * itself, so it takes the documents untouched.
+ */
+function expandPerDay(tasks: MetricTask[], weekDays: Date[]): MetricTask[] {
+    const expanded: MetricTask[] = [];
 
-  if (!token) {
-    return { tasks: [], rawTasks: [], gratitudes: [], journals: [] };
-  }
+    for (const day of weekDays) {
+        const date = dayKey(day);
+        for (const task of tasks) {
+            if (!isActiveOn(task, date)) continue;
+            expanded.push({ ...task, date, isCompleted: isDoneOn(task, date) });
+        }
+    }
 
-  const payload = verifyToken(token);
-  if (!payload) {
-    return { tasks: [], rawTasks: [], gratitudes: [], journals: [] };
-  }
-
-  await connectToDatabase();
-
-  // Calculate current week range (Server time might differ, but usually OK for initial load)
-  // Ideally, we'd use client time, but for SSR we assume "today" at server location or UTC
-  const today = new Date();
-  const startOfCurrentWeek = startOfWeek(today, { weekStartsOn: 1 });
-  const weekDays = Array.from({ length: 7 }).map((_, i) => addDays(startOfCurrentWeek, i));
-  const startDate = format(weekDays[0], 'yyyy-MM-dd');
-  const endDate = format(weekDays[6], 'yyyy-MM-dd');
-
-  const userId = payload.userId;
-
-  // Fetch Tasks
-  const query: any = {
-    userId: userId,
-    $or: [
-      {
-        type: 'regular',
-        date: { $lte: endDate },
-        $or: [
-          { endDate: { $exists: false } },
-          { endDate: { $gte: startDate } }
-        ]
-      },
-      {
-        type: 'spontaneous',
-        date: { $gte: startDate, $lte: endDate }
-      }
-    ]
-  };
-
-  if (startDate && endDate) {
-    // Logic handled in $or above
-  } else if (startDate) {
-    query.$or[1].date = startDate; // Legacy logic preservation
-  }
-
-
-  // Fetch Data in Parallel
-  const [tasksData, gratitudesData, journalsData] = await Promise.all([
-    Task.find(query).sort({ createdAt: 1 }).lean(),
-    Gratitude.find({
-      userId: userId,
-      date: { $gte: startDate, $lte: endDate }
-    }).lean(),
-    Journal.find({
-      userId: userId,
-      date: { $gte: startDate, $lte: endDate }
-    }).lean()
-  ]);
-
-  // Process tasks to merge regular ones (Client logic duplicated for SSR)
-  const processedTasks: any[] = [];
-  const regularTasks = tasksData.filter((t: any) => t.type === 'regular');
-  const spontaneousTasks = tasksData.filter((t: any) => t.type === 'spontaneous');
-
-  weekDays.forEach(day => {
-    const dateStr = format(day, 'yyyy-MM-dd');
-
-    // Add spontaneous tasks
-    const daysSpontaneous = spontaneousTasks.filter((t: any) => t.date === dateStr);
-    processedTasks.push(...daysSpontaneous);
-
-    // Add regular tasks
-    regularTasks.forEach((regTask: any) => {
-      const isCompletedForDay = regTask.completedDates?.includes(dateStr) || false;
-      processedTasks.push({
-        ...regTask,
-        date: dateStr,
-        isCompleted: isCompletedForDay,
-        _id: regTask._id.toString() // Serialization
-      });
-    });
-  });
-
-  // Serialization helper
-  const serialize = (data: any[]) => data.map((item: any) => ({
-    ...item,
-    _id: item._id.toString(),
-    userId: item.userId.toString(),
-    createdAt: item.createdAt?.toISOString(),
-    updatedAt: item.updatedAt?.toISOString(),
-  }));
-
-  return {
-    tasks: serialize(processedTasks), // Tasks are already partly processed but need ID stringification
-    // The desktop matrix derives its own per-day state, so it wants the
-    // documents as stored rather than the expanded instances above.
-    rawTasks: serialize(tasksData),
-    gratitudes: serialize(gratitudesData),
-    journals: serialize(journalsData)
-  };
+    return expanded;
 }
 
 export default async function Home() {
-  const { tasks, rawTasks, gratitudes, journals } = await getData();
+    const userId = await getSessionUserId();
+    const now = new Date();
+    const today = dayKey(now);
 
-  return (
-    <main>
-      <WeekScreen
-        initialTasks={tasks}
-        initialRawTasks={rawTasks}
-        initialGratitudes={gratitudes}
-        initialJournals={journals}
-      />
-    </main>
-  );
+    const weekStart = startOfWeek(now, { weekStartsOn: 1 });
+    const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
+    const weekStartKey = dayKey(weekDays[0]);
+    const weekEndKey = dayKey(weekDays[6]);
+
+    if (!userId) {
+        return (
+            <main>
+                <WeekScreen initialDate={today} />
+            </main>
+        );
+    }
+
+    const [rawTasks, entries] = await Promise.all([
+        loadTasksInRange(userId, dayKey(subDays(weekStart, WEEK_HISTORY_DAYS)), weekEndKey),
+        loadEntriesInRange(userId, weekStartKey, weekEndKey),
+    ]);
+
+    return (
+        <main>
+            <WeekScreen
+                initialDate={today}
+                initialRawTasks={rawTasks}
+                initialTasks={expandPerDay(rawTasks, weekDays)}
+                initialGratitudes={entries.gratitudes}
+                initialJournals={entries.journals}
+            />
+        </main>
+    );
 }

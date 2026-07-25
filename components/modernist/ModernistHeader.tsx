@@ -2,8 +2,26 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useSyncExternalStore } from 'react';
 import { format, getISOWeek } from 'date-fns';
+
+// The clock never pushes updates, so there's nothing to subscribe to — this
+// only exists to give useSyncExternalStore a snapshot that's null on the
+// server and the real stamp on the client, without a setState-in-effect
+// round trip (which was the previous implementation and cost an extra render
+// on every page load).
+function subscribe() {
+    return () => { };
+}
+
+function getSnapshot() {
+    const now = new Date();
+    return `Week ${getISOWeek(now)} · ${format(now, 'yyyy')}`;
+}
+
+function getServerSnapshot() {
+    return '';
+}
 
 const LINKS = [
     { href: '/', label: 'Week' },
@@ -14,13 +32,8 @@ const LINKS = [
 
 export default function ModernistHeader() {
     const pathname = usePathname();
-    // Rendered after mount only, so the server never has to guess the date.
-    const [stamp, setStamp] = useState('');
-
-    useEffect(() => {
-        const now = new Date();
-        setStamp(`Week ${getISOWeek(now)} · ${format(now, 'yyyy')}`);
-    }, []);
+    // Empty on the server, the real stamp once mounted on the client.
+    const stamp = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
     return (
         <header className="m-header">

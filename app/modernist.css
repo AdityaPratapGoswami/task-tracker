@@ -497,6 +497,14 @@ textarea.m-input {
   letter-spacing: 0.08em;
 }
 
+.m-overdue-tag {
+  font-family: var(--m-heading);
+  font-weight: 800;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--m-accent);
+}
+
 .m-bigpct {
   font-family: var(--m-heading);
   font-weight: 800;
@@ -653,4 +661,21 @@ textarea.m-input {
   font-size: 14px;
   color: var(--m-neutral-600);
   padding: 18px 0;
+}
+
+/* ── loading placeholders ─────────────────────────────────────────────── */
+
+/*
+ * Used in place of empty-state copy while data is still in flight. An empty
+ * state is an assertion ("nothing scheduled"), and it isn't true yet.
+ */
+.m-skel {
+  display: block;
+  background: var(--m-neutral-300);
+  animation: m-skel-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes m-skel-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
 }

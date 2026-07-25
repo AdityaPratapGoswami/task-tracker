@@ -1,18 +1,10 @@
-'use client';
+import ProfileScreen from '@/components/modernist/ProfileScreen';
+import { getSessionUserId, loadProfile } from '@/lib/serverData';
+import { dayKey } from '@/lib/metrics';
 
-import dynamic from 'next/dynamic';
-import useIsDesktop from '@/lib/useIsDesktop';
-import ProfileBoard from '@/components/modernist/ProfileBoard';
-import AppLoader from '@/components/AppLoader';
+export default async function ProfilePage() {
+    const userId = await getSessionUserId();
+    const initialData = userId ? await loadProfile(userId, dayKey(new Date())) : undefined;
 
-const ProfileScreenMobile = dynamic(() => import('@/components/legacy/ProfileScreenMobile'), {
-    ssr: false,
-    loading: () => <AppLoader />,
-});
-
-export default function ProfilePage() {
-    const isDesktop = useIsDesktop();
-
-    if (isDesktop === null) return <AppLoader />;
-    return isDesktop ? <ProfileBoard /> : <ProfileScreenMobile />;
+    return <ProfileScreen initialData={initialData} />;
 }

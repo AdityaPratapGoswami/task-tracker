@@ -21,9 +21,18 @@ export interface MetricTask {
     points?: 1 | 2 | 3;
     isImportant?: boolean;
     isUrgent?: boolean;
+    /** Spontaneous only: true once it's been rolled forward past its original date. */
+    isOverdue?: boolean;
 }
 
 export const dayKey = (d: Date) => format(d, 'yyyy-MM-dd');
+
+/**
+ * How far back the week view fetches. The grid shows seven days but the streak
+ * counts back further, so both the server loader and WeekBoard's client key
+ * must use this same window or the cache misses on first paint.
+ */
+export const WEEK_HISTORY_DAYS = 56;
 
 export const pointsOf = (t: MetricTask) => t.points || 1;
 

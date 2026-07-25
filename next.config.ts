@@ -19,7 +19,24 @@ import type { NextConfig } from "next";
  * a hand-written kill-switch that unregisters the old worker; see that file.
  */
 const nextConfig: NextConfig = {
-  /* config options here */
+  experimental: {
+    /*
+     * The four screens are dynamic (they read the session cookie), and by
+     * default dynamic segments aren't kept in the client router cache at all —
+     * so every tab switch refetched its payload. Holding them briefly makes
+     * switching back to a tab you were just on instant and network-free.
+     */
+    staleTimes: {
+      dynamic: 30,
+      static: 180,
+    },
+    /*
+     * Dynamic routes are also not prefetched by default. This prefetches them
+     * on link hover, so by the time a nav tab is actually clicked its data has
+     * usually already arrived.
+     */
+    dynamicOnHover: true,
+  },
 };
 
 export default nextConfig;

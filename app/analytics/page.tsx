@@ -1,21 +1,22 @@
-'use client';
+import { startOfWeek, addDays, subDays } from 'date-fns';
+import AnalyticsScreen from '@/components/modernist/AnalyticsScreen';
+import { getSessionUserId, loadTasksInRange } from '@/lib/serverData';
+import { dayKey } from '@/lib/metrics';
 
-import dynamic from 'next/dynamic';
-import useIsDesktop from '@/lib/useIsDesktop';
-import AnalyticsBoard from '@/components/modernist/AnalyticsBoard';
-import AppLoader from '@/components/AppLoader';
+export default async function AnalyticsPage() {
+    const userId = await getSessionUserId();
+    const now = new Date();
+    const weekStart = startOfWeek(now, { weekStartsOn: 1 });
 
-// AnalyticsDashboard pulls in recharts. The desktop board draws its chart with
-// plain CSS, so gating the legacy screen behind a dynamic import keeps recharts
-// out of the desktop bundle completely.
-const AnalyticsDashboard = dynamic(() => import('@/components/AnalyticsDashboard'), {
-    ssr: false,
-    loading: () => <AppLoader />,
-});
+    // Covers the shown week plus the previous one, which is what the board
+    // needs for its "vs. last week" figure.
+    const initialTasks = userId
+        ? await loadTasksInRange(
+            userId,
+            dayKey(subDays(weekStart, 7)),
+            dayKey(addDays(weekStart, 6))
+        )
+        : undefined;
 
-export default function AnalyticsPage() {
-    const isDesktop = useIsDesktop();
-
-    if (isDesktop === null) return <AppLoader />;
-    return isDesktop ? <AnalyticsBoard /> : <AnalyticsDashboard />;
+    return <AnalyticsScreen initialDate={dayKey(now)} initialTasks={initialTasks} />;
 }

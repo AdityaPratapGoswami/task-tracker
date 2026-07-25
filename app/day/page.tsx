@@ -1,20 +1,13 @@
-'use client';
+import DayScreen from '@/components/modernist/DayScreen';
+import { getSessionUserId, loadDay } from '@/lib/serverData';
+import { dayKey } from '@/lib/metrics';
 
-import dynamic from 'next/dynamic';
-import useIsDesktop from '@/lib/useIsDesktop';
-import DayBoard from '@/components/modernist/DayBoard';
-import AppLoader from '@/components/AppLoader';
+export default async function DayPage() {
+    // Loading here rather than in the client means the data arrives with the
+    // navigation payload instead of after three more round trips.
+    const userId = await getSessionUserId();
+    const date = dayKey(new Date());
+    const initialData = userId ? await loadDay(userId, date) : undefined;
 
-// The legacy mobile screen is only ever needed below 1024px, so it stays out
-// of the desktop bundle entirely.
-const DayScreenMobile = dynamic(() => import('@/components/legacy/DayScreenMobile'), {
-    ssr: false,
-    loading: () => <AppLoader />,
-});
-
-export default function DayPage() {
-    const isDesktop = useIsDesktop();
-
-    if (isDesktop === null) return <AppLoader />;
-    return isDesktop ? <DayBoard /> : <DayScreenMobile />;
+    return <DayScreen initialDate={date} initialData={initialData} />;
 }

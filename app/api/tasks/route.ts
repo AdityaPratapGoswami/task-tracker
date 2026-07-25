@@ -3,6 +3,7 @@ import connectToDatabase from '@/lib/db';
 import Task from '@/models/Task';
 import { verifyToken } from '@/lib/auth';
 import { cookies } from 'next/headers';
+import { loadTasksInRange } from '@/lib/serverData';
 
 export async function GET(request: Request) {
     try {
@@ -21,35 +22,11 @@ export async function GET(request: Request) {
         const { searchParams } = new URL(request.url);
         const startDate = searchParams.get('startDate');
         const endDate = searchParams.get('endDate');
-
-        await connectToDatabase();
-
-        const query: any = {
-            userId: payload.userId,
-            $or: [
-                {
-                    type: 'regular',
-                    date: { $lte: endDate }, // Only show regular tasks created on or before the end of the query range
-                    $or: [
-                        { endDate: { $exists: false } },
-                        { endDate: { $gte: startDate } }
-                    ]
-                },
-                {
-                    type: 'spontaneous',
-                    date: { $gte: startDate, $lte: endDate }
-                }
-            ]
-        };
-
-        if (startDate && endDate) {
-            // Logic handled in $or above
-        } else if (startDate) {
-            query.$or[1].date = startDate;
+        if (!startDate || !endDate) {
+            return NextResponse.json({ error: 'startDate and endDate are required' }, { status: 400 });
         }
 
-        const tasks = await Task.find(query).sort({ createdAt: 1 }).lean();
-        return NextResponse.json(tasks);
+        return NextResponse.json(await loadTasksInRange(payload.userId, startDate, endDate));
     } catch (error) {
         console.error('Error in GET /api/tasks:', error);
         return NextResponse.json({ error: 'Failed to fetch tasks' }, { status: 500 });

@@ -6,6 +6,7 @@ import { Pencil, Trash2 } from 'lucide-react';
 import AddOKRModal from '../AddOKRModal';
 import AddTaskModal from '../AddTaskModal';
 import QuickAddSpontaneous from './QuickAddSpontaneous';
+import ConfirmDialog from './ConfirmDialog';
 import { useAuth } from '@/context/AuthContext';
 import { IOKR } from '@/types/okr';
 import { MetricTask, dayKey, isActiveOn, pointsOf } from '@/lib/metrics';
@@ -46,6 +47,9 @@ export default function ProfileBoard() {
     const [newCategoryName, setNewCategoryName] = useState('');
     const [savingCategory, setSavingCategory] = useState(false);
     const [spontaneousModalOpen, setSpontaneousModalOpen] = useState(false);
+    const [pendingConfirm, setPendingConfirm] = useState<
+        { type: 'task'; task: MetricTask } | { type: 'category'; pillar: Pillar } | null
+    >(null);
 
     const today = dayKey(new Date());
 
@@ -186,30 +190,34 @@ export default function ProfileBoard() {
 
     // Regular tasks are archived (endDate set) rather than hard-deleted, so
     // history for already-completed days is preserved — same convention the
-    // day board and mobile screen use.
-    const deleteTask = async (task: MetricTask) => {
-        if (!window.confirm(`Remove "${task.title}"?`)) return;
-        try {
-            await fetch(`/api/tasks/${task._id}?date=${today}`, { method: 'DELETE' });
-            setTasks((prev) => prev.filter((t) => t._id !== task._id));
-        } catch (err) {
-            console.error('Failed to remove task', err);
-        }
+    // day board and mobile screen use. Both this and category removal are
+    // destructive enough to confirm first, via the dialog rendered below
+    // rather than window.confirm, which looks and reads like the browser
+    // rather than the app.
+    const deleteTask = (task: MetricTask) => {
+        setPendingConfirm({ type: 'task', task });
     };
 
-    const deleteCategory = async (pillar: Pillar) => {
+    const deleteCategory = (pillar: Pillar) => {
         if (!pillar.categoryId) return;
-        const count = pillar.tasks.length;
-        const warning = count > 0
-            ? `Remove "${pillar.name}"? Its ${count} task${count === 1 ? '' : 's'} will be archived too.`
-            : `Remove "${pillar.name}"?`;
-        if (!window.confirm(warning)) return;
+        setPendingConfirm({ type: 'category', pillar });
+    };
 
+    const runPendingConfirm = async () => {
+        if (!pendingConfirm) return;
         try {
-            await fetch(`/api/categories/${pillar.categoryId}`, { method: 'DELETE' });
-            await load();
+            if (pendingConfirm.type === 'task') {
+                const { task } = pendingConfirm;
+                await fetch(`/api/tasks/${task._id}?date=${today}`, { method: 'DELETE' });
+                setTasks((prev) => prev.filter((t) => t._id !== task._id));
+            } else {
+                await fetch(`/api/categories/${pendingConfirm.pillar.categoryId}`, { method: 'DELETE' });
+                await load();
+            }
         } catch (err) {
-            console.error('Failed to remove category', err);
+            console.error('Failed to complete removal', err);
+        } finally {
+            setPendingConfirm(null);
         }
     };
 
@@ -486,6 +494,21 @@ export default function ProfileBoard() {
                 isOpen={spontaneousModalOpen}
                 onClose={() => setSpontaneousModalOpen(false)}
                 onCreated={(task) => setTasks((prev) => [...prev, task])}
+            />
+            <ConfirmDialog
+                isOpen={!!pendingConfirm}
+                title={pendingConfirm?.type === 'category' ? 'Remove category' : 'Remove task'}
+                message={
+                    pendingConfirm?.type === 'category'
+                        ? pendingConfirm.pillar.tasks.length > 0
+                            ? `Remove "${pendingConfirm.pillar.name}"? Its ${pendingConfirm.pillar.tasks.length} task${pendingConfirm.pillar.tasks.length === 1 ? '' : 's'} will be archived too.`
+                            : `Remove "${pendingConfirm.pillar.name}"?`
+                        : pendingConfirm?.type === 'task'
+                            ? `Remove "${pendingConfirm.task.title}"?`
+                            : ''
+                }
+                onConfirm={runPendingConfirm}
+                onCancel={() => setPendingConfirm(null)}
             />
         </section>
     );

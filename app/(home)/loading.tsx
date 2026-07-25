@@ -1,5 +1,5 @@
-import WeekViewSkeleton from '@/components/WeekViewSkeleton';
+import AppLoader from '@/components/AppLoader';
 
 export default function Loading() {
-    return <WeekViewSkeleton />;
+    return <AppLoader />;
 }

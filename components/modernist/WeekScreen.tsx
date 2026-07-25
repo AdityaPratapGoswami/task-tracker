@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic';
 import useIsDesktop from '@/lib/useIsDesktop';
 import WeekBoard from './WeekBoard';
-import WeekViewSkeleton from '../WeekViewSkeleton';
+import AppLoader from '../AppLoader';
 import { MetricTask } from '@/lib/metrics';
 import { ITask } from '@/models/Task';
 import { IGratitude } from '@/models/Gratitude';
@@ -11,7 +11,7 @@ import { IJournal } from '@/models/Journal';
 
 const WeekView = dynamic(() => import('../WeekView'), {
     ssr: false,
-    loading: () => <WeekViewSkeleton />,
+    loading: () => <AppLoader />,
 });
 
 interface Props {
@@ -31,7 +31,7 @@ export default function WeekScreen({
 }: Props) {
     const isDesktop = useIsDesktop();
 
-    if (isDesktop === null) return <WeekViewSkeleton />;
+    if (isDesktop === null) return <AppLoader />;
 
     return isDesktop ? (
         <WeekBoard initialTasks={initialRawTasks} />

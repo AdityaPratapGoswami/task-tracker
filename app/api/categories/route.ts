@@ -55,7 +55,7 @@ export async function POST(request: Request) {
 
         const category = await Category.create({ ...body, userId: payload.userId });
         return NextResponse.json(category, { status: 201 });
-    } catch (error) {
+    } catch {
         return NextResponse.json({ error: 'Failed to create category' }, { status: 500 });
     }
 }

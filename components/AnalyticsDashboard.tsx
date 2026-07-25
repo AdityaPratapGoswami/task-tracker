@@ -102,51 +102,8 @@ export default function AnalyticsDashboard() {
     };
 
 
-
-    // Prepare data for the Matrix
-    // We want to pass ALL tasks that are relevant to this week to the matrix
-    // Relevant = Spontaneous tasks in this week OR Regular tasks active in this week
-    const matrixTasks = allFetchedTasks.map(task => {
-        // Calculate dynamic "isCompleted" for the matrix visualization
-        // For regular tasks, if they completed it AT LEAST ONCE this week, count as completed?
-        // OR better: The matrix asks for "Completion Rate of POINTS".
-        // The Plan says: "In each quadrant, calculate and display the completion rate of points."
-        // So for a regular task worth 3 points, if it was done 2 out of 7 days, is that "completed"?
-        // No, that's partial.
-
-        // HOWEVER, the 2x2 matrix usually bucketizes TASKS.
-        // If we want "Completion Rate of Points", we calculate coordinates based on (Total Points / Completed Points).
-        // My previous matrix logic sums up points of "completed" tasks.
-        // For a recurring task, it's not binary "completed" or "not".
-        // BUT, the `ImportantUrgentMatrix` I wrote expects a boolean `isCompleted`.
-
-        // COMPROMISE for Regular Tasks in Matrix:
-        // A regular task is "completed" for the purpose of the Matrix if it was completed TODAY (if today is in view) 
-        // OR if it has > 50% completion rate this week?
-        // OR, maybe we should treat each "instance" of a regular task as a task?
-        // That might be too complex for now.
-
-        // SIMPLEST INTERPRETATION:
-        // Identify if the task was completed *at all* during this week? 
-        // Or better: Let's use the average completion.
-        // IF a task is regular, `points` in the matrix = Total Potential Points for the week.
-        // `completed` points = Actual Completed Points.
-        // `ImportantUrgentMatrix` logic sums `points` if `isCompleted` is true.
-        // This is binary.
-
-        // Let's ADJUST `ImportantUrgentMatrix` logic slightly effectively by pre-calculating?
-        // No, `ImportantUrgentMatrix` does: `if (task.isCompleted) q.completed += task.points`.
-
-        // We can synthesize "Task Instances" for the matrix to get accurate Point completion.
-        // E.g. for a Regular Task that spans 7 days, we create 7 items?
-        // That effectively weights it correctly.
-
-        // Let's attempt that: Flatten tasks into daily instances for the Matrix calculation?
-        // That ensures "Completion Rate of Points" is accurate.
-        return null;
-    }).filter(Boolean);
-
-
+    // Recurring tasks are flattened into one instance per active day so the
+    // matrix weights a daily habit above a one-off when totalling points.
     const processedMatrixTasks = useMemo(() => {
         const instances: any[] = [];
         const startStr = format(weekDays[0], 'yyyy-MM-dd');

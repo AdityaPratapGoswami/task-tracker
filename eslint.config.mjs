@@ -12,6 +12,12 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Capacitor copies the built web bundle into the native projects, so
+    // linting these just reports thousands of problems in generated vendor
+    // code and buries the real findings in our own source.
+    "ios/**",
+    "android/**",
+    "public/sw.js",
   ]),
 ]);
 

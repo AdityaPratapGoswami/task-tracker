@@ -4,7 +4,7 @@ import { cookies } from 'next/headers';
 import connectToDatabase from '@/lib/db';
 import User from '@/models/User';
 
-export async function GET(req: Request) {
+export async function GET() {
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
 

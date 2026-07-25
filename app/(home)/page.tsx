@@ -2,7 +2,7 @@ import WeekScreen from '@/components/modernist/WeekScreen';
 import { cookies } from 'next/headers';
 import { verifyToken } from '@/lib/auth';
 import connectToDatabase from '@/lib/db';
-import Task, { ITask } from '@/models/Task';
+import Task from '@/models/Task';
 import Gratitude from '@/models/Gratitude';
 import Journal from '@/models/Journal';
 import { startOfWeek, addDays, format } from 'date-fns';

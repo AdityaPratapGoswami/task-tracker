@@ -1,7 +1,9 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { startOfWeek, addDays, subDays, format } from 'date-fns';
+import { useMemo, useState } from 'react';
+import { startOfWeek, addDays, subDays, format, parseISO } from 'date-fns';
+import { useCachedJson } from '@/lib/dataCache';
+import useToday from '@/lib/useToday';
 import {
     MetricTask,
     dayKey,
@@ -18,73 +20,59 @@ import {
 
 const CHART_HEIGHT = 230;
 
-export default function AnalyticsBoard() {
-    const [anchor, setAnchor] = useState<Date | null>(null);
-    const [tasks, setTasks] = useState<MetricTask[]>([]);
+// Stable reference so an absent response doesn't invalidate every memo below.
+const NO_TASKS: MetricTask[] = [];
+
+interface Props {
+    /** The server's idea of today, as YYYY-MM-DD. */
+    initialDate: string;
+    /** Tasks spanning the shown week plus the one before it. */
+    initialTasks?: MetricTask[];
+}
+
+export default function AnalyticsBoard({ initialDate, initialTasks }: Props) {
     const [quadrant, setQuadrant] = useState<string | null>(null);
+    // Null until the user navigates weeks, so the view tracks the real today.
+    const [selected, setSelected] = useState<string | null>(null);
 
-    useEffect(() => {
-        setAnchor(new Date());
-    }, []);
+    const today = useToday(initialDate);
+    const anchorKey = selected ?? today;
+    const setAnchorKey = setSelected;
 
-    // Must be memoised: a fresh Date each render would change the identity of
-    // every dependent callback and effect, re-firing the fetch forever.
-    const weekStart = useMemo(
-        () => (anchor ? startOfWeek(anchor, { weekStartsOn: 1 }) : null),
-        [anchor]
-    );
+    const anchor = useMemo(() => parseISO(anchorKey), [anchorKey]);
+    const weekStart = useMemo(() => startOfWeek(anchor, { weekStartsOn: 1 }), [anchor]);
     const weekDays = useMemo(
-        () => (weekStart ? Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)) : []),
+        () => Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)),
         [weekStart]
     );
     const prevDays = useMemo(
-        () => (weekStart ? Array.from({ length: 7 }, (_, i) => addDays(subDays(weekStart, 7), i)) : []),
+        () => Array.from({ length: 7 }, (_, i) => addDays(subDays(weekStart, 7), i)),
         [weekStart]
     );
 
-    const today = dayKey(new Date());
-
-    const load = useCallback(async () => {
-        if (!weekStart) return;
-        try {
-            // One request spans both weeks so "vs. last week" costs no extra round trip.
-            const start = dayKey(subDays(weekStart, 7));
-            const end = dayKey(addDays(weekStart, 6));
-            const res = await fetch(`/api/tasks?startDate=${start}&endDate=${end}`);
-            if (res.ok) setTasks(await res.json());
-        } catch (err) {
-            console.error('Failed to load analytics', err);
-        }
-    }, [weekStart]);
-
-    useEffect(() => { load(); }, [load]);
-
-    const totals = useMemo(
-        () => (weekDays.length ? dayTotals(tasks, weekDays, today) : []),
-        [tasks, weekDays, today]
+    // One range spans both weeks so "vs. last week" costs no extra round trip.
+    const url = `/api/tasks?startDate=${dayKey(subDays(weekStart, 7))}&endDate=${dayKey(addDays(weekStart, 6))}`;
+    const { data, isLoading } = useCachedJson<MetricTask[]>(
+        url,
+        anchorKey === initialDate ? initialTasks : undefined
     );
-    const summary = useMemo(
-        () => (totals.length ? weekSummary(totals, weekDays) : null),
-        [totals, weekDays]
-    );
+    const tasks = useMemo(() => data ?? NO_TASKS, [data]);
+
+    const totals = useMemo(() => dayTotals(tasks, weekDays, today), [tasks, weekDays, today]);
+    const summary = useMemo(() => weekSummary(totals, weekDays), [totals, weekDays]);
     const prevSummary = useMemo(
-        () => (prevDays.length ? weekSummary(dayTotals(tasks, prevDays, today), prevDays) : null),
+        () => weekSummary(dayTotals(tasks, prevDays, today), prevDays),
         [tasks, prevDays, today]
     );
 
     const perf = useMemo(() => {
-        if (!weekDays.length) return [];
         const scoped = tasks.filter((t) => matchesQuadrant(t, quadrant));
         return taskPerformance(scoped, weekDays, today);
     }, [tasks, weekDays, today, quadrant]);
 
-    const quads = useMemo(
-        () => (weekDays.length ? eisenhower(tasks, weekDays, today) : []),
-        [tasks, weekDays, today]
-    );
+    const quads = useMemo(() => eisenhower(tasks, weekDays, today), [tasks, weekDays, today]);
 
     const strongestPillar = useMemo(() => {
-        if (!weekDays.length) return null;
         const visible = tasks.filter((t) => weekDays.some((d) => isActiveOn(t, dayKey(d))));
         const groups = groupByCategory(visible);
         let best: { name: string; pct: number } | null = null;
@@ -107,19 +95,13 @@ export default function AnalyticsBoard() {
         return best;
     }, [tasks, weekDays, today]);
 
-    if (!anchor || !summary) {
-        return (
-            <section className="m-shell">
-                <div className="m-kicker">Analytics</div>
-                <h1 className="m-title" style={{ marginTop: 10 }}>Loading…</h1>
-            </section>
-        );
-    }
-
-    const delta = prevSummary ? summary.pct - prevSummary.pct : 0;
+    const delta = summary.pct - prevSummary.pct;
     const mostDone = perf.length ? perf[0] : null;
     const leastDone = perf.length > 1 ? perf[perf.length - 1] : null;
     const rangeLabel = `${format(weekDays[0], 'MMM d')} — ${format(weekDays[6], 'MMM d')}`;
+
+    /** Placeholder until the numbers are real — a 0% would read as a fact. */
+    const dash = '—';
 
     return (
         <section className="m-shell">
@@ -129,44 +111,52 @@ export default function AnalyticsBoard() {
                     <h1 className="m-title">{rangeLabel}</h1>
                 </div>
                 <div className="m-actions">
-                    <button className="m-btn m-btn-secondary" onClick={() => setAnchor(subDays(anchor, 7))} aria-label="Previous week">←</button>
-                    <button className="m-btn m-btn-secondary" onClick={() => setAnchor(addDays(anchor, 7))} aria-label="Next week">→</button>
+                    <button className="m-btn m-btn-secondary" onClick={() => setAnchorKey(dayKey(subDays(anchor, 7)))} aria-label="Previous week">←</button>
+                    <button className="m-btn m-btn-secondary" onClick={() => setAnchorKey(dayKey(addDays(anchor, 7)))} aria-label="Next week">→</button>
                 </div>
             </div>
 
             <div className="m-stats">
                 <div className="m-stat">
                     <div className="m-label">Avg. completion</div>
-                    <div className="m-stat-value m-accent">{summary.pct}%</div>
+                    <div className="m-stat-value m-accent">{isLoading ? dash : `${summary.pct}%`}</div>
                 </div>
                 <div className="m-stat">
                     <div className="m-label">Points closed</div>
-                    <div className="m-stat-value">{summary.earned}</div>
+                    <div className="m-stat-value">{isLoading ? dash : summary.earned}</div>
                 </div>
                 <div className="m-stat">
                     <div className="m-label">vs. last week</div>
                     <div className="m-stat-value">
-                        {prevSummary && prevSummary.possible > 0
-                            ? `${delta > 0 ? '+' : ''}${delta}%`
-                            : '—'}
+                        {isLoading || prevSummary.possible === 0
+                            ? dash
+                            : `${delta > 0 ? '+' : ''}${delta}%`}
                     </div>
                 </div>
                 <div className="m-stat">
                     <div className="m-label">Strongest pillar</div>
-                    <div className="m-stat-value">{strongestPillar?.name ?? '—'}</div>
+                    <div className="m-stat-value">{isLoading ? dash : strongestPillar?.name ?? dash}</div>
                 </div>
             </div>
 
             <div style={{ padding: '44px 0 0' }}>
                 <h2 className="m-h2" style={{ marginBottom: 32 }}>Completion by day</h2>
                 <div className="m-chart">
-                    {totals.map((t, i) => {
+                    {(isLoading ? weekDays.map(() => null) : totals).map((t, i) => {
+                        if (!t) {
+                            return (
+                                <div className="m-chart-col" key={i}>
+                                    <div className="m-skel" style={{ height: 12, width: 28, marginBottom: 8 }} />
+                                    <div className="m-skel" style={{ height: 40 + i * 12 }} />
+                                </div>
+                            );
+                        }
                         const isToday = t.date === today;
                         const color = isToday ? 'var(--m-accent)' : t.isFuture ? 'var(--m-neutral-400)' : 'var(--m-text)';
                         return (
                             <div className="m-chart-col" key={t.date}>
                                 <div className="m-chart-val" style={{ color }}>
-                                    {t.isFuture ? '—' : `${t.pct}%`}
+                                    {t.isFuture ? dash : `${t.pct}%`}
                                 </div>
                                 <div
                                     style={{
@@ -204,13 +194,16 @@ export default function AnalyticsBoard() {
                             className={`m-quad ${quadrant === q.key ? 'm-quad-on' : ''}`}
                             onClick={() => setQuadrant(quadrant === q.key ? null : q.key)}
                             aria-pressed={quadrant === q.key}
+                            disabled={isLoading}
                         >
                             <div className="m-label" style={{ marginBottom: 12 }}>{q.label}</div>
                             <div className={`m-quad-value ${q.key === 'important_urgent' ? 'm-accent' : ''}`}>
-                                {q.pct}%
+                                {isLoading ? dash : `${q.pct}%`}
                             </div>
                             <div style={{ fontSize: 13, color: 'var(--m-neutral-600)', marginTop: 6 }}>
-                                {q.completed} / {q.total} pts · {q.count} {q.count === 1 ? 'task' : 'tasks'}
+                                {isLoading
+                                    ? ' '
+                                    : `${q.completed} / ${q.total} pts · ${q.count} ${q.count === 1 ? 'task' : 'tasks'}`}
                             </div>
                         </button>
                     ))}
@@ -221,9 +214,9 @@ export default function AnalyticsBoard() {
                 <div style={{ padding: '32px 32px 32px 0' }}>
                     <div className="m-label m-accent" style={{ marginBottom: 10 }}>Most done</div>
                     <div style={{ fontFamily: 'var(--m-heading)', fontWeight: 800, fontSize: 28, letterSpacing: '-0.02em' }}>
-                        {mostDone?.title ?? '—'}
+                        {isLoading ? dash : mostDone?.title ?? dash}
                     </div>
-                    {mostDone && (
+                    {!isLoading && mostDone && (
                         <div style={{ fontSize: 13, color: 'var(--m-neutral-600)', marginTop: 4 }}>
                             {mostDone.completed} of {mostDone.possible} days · {mostDone.pct}%
                         </div>
@@ -232,9 +225,9 @@ export default function AnalyticsBoard() {
                 <div style={{ padding: 32, borderLeft: '2px solid var(--m-divider)' }}>
                     <div className="m-label" style={{ marginBottom: 10 }}>Least done</div>
                     <div style={{ fontFamily: 'var(--m-heading)', fontWeight: 800, fontSize: 28, letterSpacing: '-0.02em' }}>
-                        {leastDone?.title ?? '—'}
+                        {isLoading ? dash : leastDone?.title ?? dash}
                     </div>
-                    {leastDone && (
+                    {!isLoading && leastDone && (
                         <div style={{ fontSize: 13, color: 'var(--m-neutral-600)', marginTop: 4 }}>
                             {leastDone.completed} of {leastDone.possible} days · {leastDone.pct}%
                         </div>
@@ -247,8 +240,15 @@ export default function AnalyticsBoard() {
                     {quadrant ? 'Filtered tasks' : 'Task performance'}
                 </h2>
                 <div style={{ borderTop: '2px solid var(--m-divider)' }}>
-                    {perf.length === 0 && <p className="m-empty">No tasks for this selection.</p>}
-                    {perf.map((t) => (
+                    {isLoading && [0, 1, 2, 3, 4].map((i) => (
+                        <div className="m-perf-row" key={i}>
+                            <div className="m-skel" style={{ height: 14, width: `${75 - i * 7}%` }} />
+                            <div className="m-skel" style={{ height: 8 }} />
+                            <div className="m-skel" style={{ height: 14 }} />
+                        </div>
+                    ))}
+                    {!isLoading && perf.length === 0 && <p className="m-empty">No tasks for this selection.</p>}
+                    {!isLoading && perf.map((t) => (
                         <div className="m-perf-row" key={t.id}>
                             <div style={{ fontSize: 15 }}>{t.title}</div>
                             <div className="m-thin-track">

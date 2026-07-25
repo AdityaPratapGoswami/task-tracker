@@ -10,10 +10,16 @@ import ConfirmDialog from './ConfirmDialog';
 import { useAuth } from '@/context/AuthContext';
 import { IOKR } from '@/types/okr';
 import { MetricTask, dayKey, isActiveOn, pointsOf } from '@/lib/metrics';
+import type { ProfileData } from '@/lib/serverData';
 
 interface Category {
     _id: string;
     name: string;
+}
+
+interface Props {
+    /** Loaded during the server render, so the first paint already has data. */
+    initialData?: ProfileData;
 }
 
 interface Pillar {
@@ -29,13 +35,15 @@ function quarterInfo(date: Date) {
     return { quarter, daysRemaining: Math.max(0, differenceInCalendarDays(end, date)) };
 }
 
-export default function ProfileBoard() {
+export default function ProfileBoard({ initialData }: Props) {
     const { user, logout } = useAuth();
-    const [name, setName] = useState('');
+    const [name, setName] = useState(initialData?.name ?? '');
     const [savingName, setSavingName] = useState(false);
-    const [okrs, setOkrs] = useState<IOKR[]>([]);
-    const [tasks, setTasks] = useState<MetricTask[]>([]);
-    const [categories, setCategories] = useState<Category[]>([]);
+    const [okrs, setOkrs] = useState<IOKR[]>(initialData?.okrs ?? []);
+    const [tasks, setTasks] = useState<MetricTask[]>(initialData?.tasks ?? []);
+    const [categories, setCategories] = useState<Category[]>(initialData?.categories ?? []);
+    // Empty-state copy is only truthful once a load has actually completed.
+    const [loaded, setLoaded] = useState(!!initialData);
     const [okrModalOpen, setOkrModalOpen] = useState(false);
     const [okrToEdit, setOkrToEdit] = useState<IOKR | null>(null);
     const [taskModalOpen, setTaskModalOpen] = useState(false);
@@ -70,10 +78,16 @@ export default function ProfileBoard() {
             if (categoryRes.ok) setCategories(await categoryRes.json());
         } catch (err) {
             console.error('Failed to load profile', err);
+        } finally {
+            setLoaded(true);
         }
     }, [today]);
 
-    useEffect(() => { load(); }, [load]);
+    // With server-rendered data there is nothing to fetch on mount; navigating
+    // here re-runs the server component, so this only runs as a fallback.
+    useEffect(() => {
+        if (!initialData) load();
+    }, [initialData, load]);
 
     useEffect(() => {
         if (!name && user?.name) setName(user.name);
@@ -289,7 +303,8 @@ export default function ProfileBoard() {
                     Quarter {quarter} · {daysRemaining} days remaining
                 </p>
 
-                {okrs.length === 0 && <p className="m-empty">No objectives yet.</p>}
+                {!loaded && <div className="m-skel" style={{ height: 14, width: '30%', margin: '18px 0' }} />}
+                {loaded && okrs.length === 0 && <p className="m-empty">No objectives yet.</p>}
 
                 {okrs.map((okr, i) => {
                     const total = okr.keyResults.length;
@@ -341,7 +356,15 @@ export default function ProfileBoard() {
                         These appear on your board every day.
                     </p>
 
-                    {pillars.length === 0 && <p className="m-empty">No categories yet.</p>}
+                    {!loaded && [0, 1].map((i) => (
+                        <div key={i} style={{ marginBottom: 26 }}>
+                            <div className="m-skel" style={{ height: 12, width: '28%', marginBottom: 14 }} />
+                            <div className="m-skel" style={{ height: 14, width: '65%', marginBottom: 10 }} />
+                            <div className="m-skel" style={{ height: 14, width: '50%' }} />
+                        </div>
+                    ))}
+
+                    {loaded && pillars.length === 0 && <p className="m-empty">No categories yet.</p>}
 
                     {pillars.map((pillar) => (
                         <div style={{ marginBottom: 26 }} key={pillar.name}>
@@ -444,13 +467,16 @@ export default function ProfileBoard() {
                         One-offs for today, {format(new Date(), 'MMM d')}.
                     </p>
                     <div style={{ borderTop: '2px solid var(--m-divider)' }}>
-                        {spontaneous.length === 0 && <p className="m-empty">Nothing one-off today.</p>}
+                        {!loaded && <div className="m-skel" style={{ height: 14, width: '55%', margin: '18px 0' }} />}
+                        {loaded && spontaneous.length === 0 && <p className="m-empty">Nothing one-off today.</p>}
                         {spontaneous.map((task) => (
                             <div className="m-listrow" key={task._id}>
                                 <span style={{ fontSize: 15 }}>{task.title}</span>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                                    <span className="m-pts">
-                                        {task.isUrgent ? 'URGENT' : task.isImportant ? 'IMPORTANT' : 'LATER'}
+                                    <span className={task.isOverdue ? 'm-overdue-tag' : 'm-pts'}>
+                                        {task.isOverdue
+                                            ? 'OVERDUE'
+                                            : task.isUrgent ? 'URGENT' : task.isImportant ? 'IMPORTANT' : 'LATER'}
                                     </span>
                                     <button
                                         className="m-btn m-btn-ghost"

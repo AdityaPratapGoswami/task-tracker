@@ -1,8 +1,11 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { addDays, subDays, format } from 'date-fns';
+import { useMemo, useState } from 'react';
+import { addDays, subDays, format, parseISO } from 'date-fns';
 import QuickAddSpontaneous from './QuickAddSpontaneous';
+import { useCachedJson, invalidateCache } from '@/lib/dataCache';
+import useToday from '@/lib/useToday';
+import type { DayData } from '@/lib/serverData';
 import {
     MetricTask,
     dayKey,
@@ -24,61 +27,85 @@ const QUOTES = [
     'Begin again, as often as needed.',
 ];
 
-export default function DayBoard() {
-    const [date, setDate] = useState<Date | null>(null);
-    const [tasks, setTasks] = useState<MetricTask[]>([]);
-    const [gratitude, setGratitude] = useState('');
-    const [journal, setJournal] = useState('');
-    const [savedAt, setSavedAt] = useState<string | null>(null);
+// Stable reference so an absent response doesn't invalidate every memo below.
+const NO_TASKS: MetricTask[] = [];
+
+interface Props {
+    /** The server's idea of today, as YYYY-MM-DD. */
+    initialDate: string;
+    /** Data for initialDate, loaded during the server render. */
+    initialData?: DayData;
+}
+
+export default function DayBoard({ initialDate, initialData }: Props) {
     const [saving, setSaving] = useState(false);
     const [modalOpen, setModalOpen] = useState(false);
+    // Null until the user navigates days, so the view tracks the real today.
+    const [selected, setSelected] = useState<string | null>(null);
 
-    useEffect(() => {
-        setDate(new Date());
-    }, []);
+    const today = useToday(initialDate);
+    const key = selected ?? today;
+    const setKey = setSelected;
 
-    const key = date ? dayKey(date) : null;
+    /*
+     * Drafts and the save stamp are tagged with the day they belong to, so
+     * changing day discards them implicitly. Holding the day inside the state
+     * avoids an effect whose only job is to reset other state.
+     */
+    const [draft, setDraft] = useState<{
+        key: string;
+        gratitude: string | null;
+        journal: string | null;
+        savedAt: string | null;
+    }>({ key: initialDate, gratitude: null, journal: null, savedAt: null });
 
-    const load = useCallback(async () => {
-        if (!key) return;
-        try {
-            const [taskRes, gratRes, jourRes] = await Promise.all([
-                fetch(`/api/tasks?startDate=${key}&endDate=${key}`),
-                fetch(`/api/gratitude?date=${key}`),
-                fetch(`/api/journal?date=${key}`),
-            ]);
-            if (taskRes.ok) setTasks(await taskRes.json());
-            if (gratRes.ok) setGratitude((await gratRes.json()).content ?? '');
-            if (jourRes.ok) setJournal((await jourRes.json()).content ?? '');
-            setSavedAt(null);
-        } catch (err) {
-            console.error('Failed to load day', err);
-        }
-    }, [key]);
+    const forThisDay = draft.key === key;
+    const gratitudeDraft = forThisDay ? draft.gratitude : null;
+    const journalDraft = forThisDay ? draft.journal : null;
+    const savedAt = forThisDay ? draft.savedAt : null;
 
-    useEffect(() => { load(); }, [load]);
+    const setGratitudeDraft = (value: string) =>
+        setDraft((d) => ({ ...(d.key === key ? d : { key, gratitude: null, journal: null, savedAt: null }), key, gratitude: value }));
+    const setJournalDraft = (value: string) =>
+        setDraft((d) => ({ ...(d.key === key ? d : { key, gratitude: null, journal: null, savedAt: null }), key, journal: value }));
 
-    const active = useMemo(
-        () => (key ? tasks.filter((t) => isActiveOn(t, key)) : []),
-        [tasks, key]
+    const url = `/api/day?date=${key}`;
+    const { data, isLoading, mutate } = useCachedJson<DayData>(
+        url,
+        key === initialDate ? initialData : undefined
     );
 
+    const tasks = useMemo(() => data?.tasks ?? NO_TASKS, [data]);
+    const gratitude = gratitudeDraft ?? data?.gratitude ?? '';
+    const journal = journalDraft ?? data?.journal ?? '';
+
+    const date = useMemo(() => parseISO(key), [key]);
+
+    const active = useMemo(() => tasks.filter((t) => isActiveOn(t, key)), [tasks, key]);
     const regular = useMemo(() => active.filter((t) => t.type === 'regular'), [active]);
     const spontaneous = useMemo(() => active.filter((t) => t.type === 'spontaneous'), [active]);
     const pillars = useMemo(() => groupByCategory(regular), [regular]);
 
     const possible = active.reduce((a, t) => a + pointsOf(t), 0);
-    const earned = key
-        ? active.reduce((a, t) => a + (isDoneOn(t, key) ? pointsOf(t) : 0), 0)
-        : 0;
+    const earned = active.reduce((a, t) => a + (isDoneOn(t, key) ? pointsOf(t) : 0), 0);
     const pct = possible > 0 ? Math.round((earned / possible) * 100) : 0;
 
+    /** Writes tasks back to the cache so the change survives navigation. */
+    const setTasks = (next: MetricTask[]) => {
+        mutate({ tasks: next, gratitude: data?.gratitude ?? '', journal: data?.journal ?? '' });
+    };
+
+    // Any task write invalidates the week and analytics views, which read the
+    // same underlying records through different keys.
+    const invalidateOtherViews = () => {
+        invalidateCache((u) => u !== url && (u.startsWith('/api/tasks') || u.startsWith('/api/day')));
+    };
+
     const toggle = async (task: MetricTask) => {
-        if (!key) return;
         const next = !isDoneOn(task, key);
 
-        setTasks((prev) =>
-            prev.map((t) => {
+        setTasks(
+            tasks.map((t) => {
                 if (t._id !== task._id) return t;
                 if (t.type === 'spontaneous') return { ...t, isCompleted: next };
                 const dates = new Set(t.completedDates ?? []);
@@ -96,21 +123,20 @@ export default function DayBoard() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body),
             });
+            invalidateOtherViews();
         } catch (err) {
             console.error('Failed to toggle task', err);
-            load();
         }
     };
 
-    // Spontaneous tasks are always dated to the real today, independent of
-    // whichever day this board is currently showing — so this only shows up
-    // in the list here when the viewed day is today.
     const handleSpontaneousCreated = (task: MetricTask) => {
-        setTasks((prev) => [...prev, task]);
+        // Spontaneous tasks are always dated to the real today, so this only
+        // belongs in the list when the board is showing today.
+        if (task.date === key) setTasks([...tasks, task]);
+        invalidateOtherViews();
     };
 
     const saveEntry = async () => {
-        if (!key) return;
         setSaving(true);
         try {
             await Promise.all([
@@ -125,7 +151,10 @@ export default function DayBoard() {
                     body: JSON.stringify({ date: key, content: journal }),
                 }),
             ]);
-            setSavedAt(format(new Date(), 'HH:mm'));
+            // Saved values become the cached truth, so the drafts can be
+            // cleared and the entry survives navigating away and back.
+            mutate({ tasks, gratitude, journal });
+            setDraft({ key, gratitude: null, journal: null, savedAt: format(new Date(), 'HH:mm') });
         } catch (err) {
             console.error('Failed to save entry', err);
         } finally {
@@ -133,16 +162,7 @@ export default function DayBoard() {
         }
     };
 
-    if (!date || !key) {
-        return (
-            <section className="m-shell">
-                <div className="m-kicker">Day view</div>
-                <h1 className="m-title" style={{ marginTop: 10 }}>Loading…</h1>
-            </section>
-        );
-    }
-
-    const isToday = key === dayKey(new Date());
+    const isToday = key === today;
     const quote = QUOTES[date.getDate() % QUOTES.length];
 
     const renderTask = (task: MetricTask) => {
@@ -151,6 +171,7 @@ export default function DayBoard() {
             <button className="m-taskrow" key={task._id} onClick={() => toggle(task)} aria-pressed={done}>
                 <span className={`m-check ${done ? 'm-check-on' : ''}`}>{done ? '✓' : ''}</span>
                 <span className={`m-tasklabel ${done ? 'm-tasklabel-done' : ''}`}>{task.title}</span>
+                {task.isOverdue && !done && <span className="m-overdue-tag">OVERDUE</span>}
                 <span className="m-pts">{pointsOf(task)} PT</span>
             </button>
         );
@@ -166,8 +187,8 @@ export default function DayBoard() {
                     <h1 className="m-title">{format(date, 'EEEE, MMM d')}</h1>
                 </div>
                 <div className="m-actions">
-                    <button className="m-btn m-btn-secondary" onClick={() => setDate(subDays(date, 1))} aria-label="Previous day">←</button>
-                    <button className="m-btn m-btn-secondary" onClick={() => setDate(addDays(date, 1))} aria-label="Next day">→</button>
+                    <button className="m-btn m-btn-secondary" onClick={() => setKey(dayKey(subDays(date, 1)))} aria-label="Previous day">←</button>
+                    <button className="m-btn m-btn-secondary" onClick={() => setKey(dayKey(addDays(date, 1)))} aria-label="Next day">→</button>
                     <button className="m-btn m-btn-primary" onClick={() => setModalOpen(true)}>+ Add task</button>
                 </div>
             </div>
@@ -183,15 +204,28 @@ export default function DayBoard() {
                     <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 26 }}>
                         <h2 className="m-h2">Today&apos;s tasks</h2>
                         <div style={{ fontSize: 13, color: 'var(--m-neutral-600)' }}>
-                            {earned} of {possible} points
+                            {isLoading ? '—' : `${earned} of ${possible} points`}
                         </div>
                     </div>
 
-                    {pillars.length === 0 && spontaneous.length === 0 && (
+                    {/* Skeletons rather than "Nothing scheduled" — an empty state
+                        is a claim, and it isn't true until the data has landed. */}
+                    {isLoading && (
+                        <div>
+                            {[0, 1, 2, 3].map((i) => (
+                                <div className="m-taskrow" key={i} style={{ cursor: 'default' }}>
+                                    <span className="m-skel" style={{ width: 22, height: 22, flex: '0 0 22px' }} />
+                                    <span className="m-skel" style={{ height: 14, flex: 1, maxWidth: `${70 - i * 8}%` }} />
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    {!isLoading && pillars.length === 0 && spontaneous.length === 0 && (
                         <p className="m-empty">Nothing scheduled. Add a task to get going.</p>
                     )}
 
-                    {pillars.map((pillar) => {
+                    {!isLoading && pillars.map((pillar) => {
                         const doneCount = pillar.tasks.filter((t) => isDoneOn(t, key)).length;
                         return (
                             <div style={{ marginBottom: 30 }} key={pillar.name}>
@@ -206,7 +240,7 @@ export default function DayBoard() {
                         );
                     })}
 
-                    {spontaneous.length > 0 && (
+                    {!isLoading && spontaneous.length > 0 && (
                         <div style={{ marginTop: 34 }}>
                             <div className="m-pillar" style={{ paddingBottom: 8, borderBottom: '2px solid var(--m-divider)' }}>
                                 SPONTANEOUS
@@ -219,13 +253,13 @@ export default function DayBoard() {
                 <div className="m-split-right">
                     <div className="m-label">Progress</div>
                     <div style={{ display: 'flex', alignItems: 'flex-end', gap: 20, margin: '6px 0 18px' }}>
-                        <div className="m-bigpct">{pct}%</div>
+                        <div className="m-bigpct">{isLoading ? '—' : `${pct}%`}</div>
                         <div style={{ fontSize: 14, color: 'var(--m-neutral-600)', paddingBottom: 10 }}>
-                            {Math.max(0, possible - earned)} points remaining
+                            {isLoading ? '' : `${Math.max(0, possible - earned)} points remaining`}
                         </div>
                     </div>
                     <div className="m-track" style={{ marginBottom: 44 }}>
-                        <div className="m-fill" style={{ width: `${pct}%` }} />
+                        <div className="m-fill" style={{ width: isLoading ? '0%' : `${pct}%` }} />
                     </div>
 
                     <p className="m-quote">{quote}</p>
@@ -236,9 +270,12 @@ export default function DayBoard() {
                             id="m-gratitude"
                             className="m-input"
                             rows={3}
-                            placeholder="What are you grateful for today?"
+                            // While loading there is no way to know whether this
+                            // day has an entry, so don't imply it's empty.
+                            placeholder={isLoading ? 'Loading…' : 'What are you grateful for today?'}
+                            disabled={isLoading}
                             value={gratitude}
-                            onChange={(e) => setGratitude(e.target.value)}
+                            onChange={(e) => setGratitudeDraft(e.target.value)}
                         />
                     </div>
 
@@ -248,14 +285,15 @@ export default function DayBoard() {
                             id="m-journal"
                             className="m-input"
                             rows={8}
-                            placeholder="Reflect on your day…"
+                            placeholder={isLoading ? 'Loading…' : 'Reflect on your day…'}
+                            disabled={isLoading}
                             value={journal}
-                            onChange={(e) => setJournal(e.target.value)}
+                            onChange={(e) => setJournalDraft(e.target.value)}
                         />
                     </div>
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                        <button className="m-btn m-btn-primary" onClick={saveEntry} disabled={saving}>
+                        <button className="m-btn m-btn-primary" onClick={saveEntry} disabled={saving || isLoading}>
                             {saving ? 'Saving…' : 'Save entry'}
                         </button>
                         {savedAt && (

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { format, differenceInCalendarDays } from 'date-fns';
 import { Pencil, Trash2 } from 'lucide-react';
 import AddOKRModal from '../AddOKRModal';
-import AddTaskModal from '../AddTaskModal';
+import AddTaskDialog from './AddTaskDialog';
 import QuickAddSpontaneous from './QuickAddSpontaneous';
 import ConfirmDialog from './ConfirmDialog';
 import { useAuth } from '@/context/AuthContext';
@@ -151,7 +151,7 @@ export default function ProfileBoard() {
     };
 
     const openEditTask = (task: MetricTask) => {
-        // AddTaskModal requires `points` as a definite number; MetricTask
+        // AddTaskDialog requires `points` as a definite number; MetricTask
         // leaves it optional to mirror the API, so it's normalised here.
         setTaskToEdit({ ...task, points: pointsOf(task) });
         setDefaultCategory(undefined);
@@ -483,7 +483,7 @@ export default function ProfileBoard() {
                 onSave={saveOkr}
                 okrToEdit={okrToEdit}
             />
-            <AddTaskModal
+            <AddTaskDialog
                 isOpen={taskModalOpen}
                 onClose={() => { setTaskModalOpen(false); setTaskToEdit(null); }}
                 onSave={saveTask}

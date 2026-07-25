@@ -2,11 +2,24 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { format, differenceInCalendarDays } from 'date-fns';
+import { Pencil, Trash2 } from 'lucide-react';
 import AddOKRModal from '../AddOKRModal';
 import AddTaskModal from '../AddTaskModal';
+import QuickAddSpontaneous from './QuickAddSpontaneous';
 import { useAuth } from '@/context/AuthContext';
 import { IOKR } from '@/types/okr';
-import { MetricTask, dayKey, groupByCategory, isActiveOn, pointsOf } from '@/lib/metrics';
+import { MetricTask, dayKey, isActiveOn, pointsOf } from '@/lib/metrics';
+
+interface Category {
+    _id: string;
+    name: string;
+}
+
+interface Pillar {
+    name: string;
+    categoryId?: string;
+    tasks: MetricTask[];
+}
 
 /** Days left in the calendar quarter that `date` falls in. */
 function quarterInfo(date: Date) {
@@ -21,19 +34,28 @@ export default function ProfileBoard() {
     const [savingName, setSavingName] = useState(false);
     const [okrs, setOkrs] = useState<IOKR[]>([]);
     const [tasks, setTasks] = useState<MetricTask[]>([]);
+    const [categories, setCategories] = useState<Category[]>([]);
     const [okrModalOpen, setOkrModalOpen] = useState(false);
     const [okrToEdit, setOkrToEdit] = useState<IOKR | null>(null);
     const [taskModalOpen, setTaskModalOpen] = useState(false);
     const [defaultCategory, setDefaultCategory] = useState<string | undefined>();
+    const [taskToEdit, setTaskToEdit] = useState<
+        (MetricTask & { points: 1 | 2 | 3 }) | null
+    >(null);
+    const [addingCategory, setAddingCategory] = useState(false);
+    const [newCategoryName, setNewCategoryName] = useState('');
+    const [savingCategory, setSavingCategory] = useState(false);
+    const [spontaneousModalOpen, setSpontaneousModalOpen] = useState(false);
 
     const today = dayKey(new Date());
 
     const load = useCallback(async () => {
         try {
-            const [profileRes, okrRes, taskRes] = await Promise.all([
+            const [profileRes, okrRes, taskRes, categoryRes] = await Promise.all([
                 fetch('/api/profile'),
                 fetch('/api/okrs'),
                 fetch(`/api/tasks?startDate=${today}&endDate=${today}`),
+                fetch('/api/categories'),
             ]);
             if (profileRes.ok) {
                 const p = await profileRes.json();
@@ -41,6 +63,7 @@ export default function ProfileBoard() {
             }
             if (okrRes.ok) setOkrs(await okrRes.json());
             if (taskRes.ok) setTasks(await taskRes.json());
+            if (categoryRes.ok) setCategories(await categoryRes.json());
         } catch (err) {
             console.error('Failed to load profile', err);
         }
@@ -62,7 +85,23 @@ export default function ProfileBoard() {
         () => tasks.filter((t) => t.type === 'spontaneous' && t.date === today),
         [tasks, today]
     );
-    const pillars = useMemo(() => groupByCategory(regular), [regular]);
+
+    // Categories with zero tasks still need a row (so "+ Add task" has
+    // somewhere to go), so this starts from the category list rather than
+    // deriving groups from tasks alone.
+    const pillars = useMemo<Pillar[]>(() => {
+        const byName = new Map<string, Pillar>();
+        for (const cat of categories) {
+            byName.set(cat.name, { name: cat.name, categoryId: cat._id, tasks: [] });
+        }
+        for (const task of regular) {
+            if (!byName.has(task.category)) {
+                byName.set(task.category, { name: task.category, tasks: [] });
+            }
+            byName.get(task.category)!.tasks.push(task);
+        }
+        return [...byName.values()];
+    }, [categories, regular]);
 
     const saveName = async () => {
         setSavingName(true);
@@ -101,25 +140,96 @@ export default function ProfileBoard() {
         }
     };
 
-    const addTask = async (data: {
-        title: string;
-        category: string;
-        points: 1 | 2 | 3;
-        isImportant: boolean;
-        isUrgent: boolean;
-    }) => {
+    const openAddTask = (category?: string) => {
+        setTaskToEdit(null);
+        setDefaultCategory(category);
+        setTaskModalOpen(true);
+    };
+
+    const openEditTask = (task: MetricTask) => {
+        // AddTaskModal requires `points` as a definite number; MetricTask
+        // leaves it optional to mirror the API, so it's normalised here.
+        setTaskToEdit({ ...task, points: pointsOf(task) });
+        setDefaultCategory(undefined);
+        setTaskModalOpen(true);
+    };
+
+    const saveTask = async (
+        data: {
+            title: string;
+            category: string;
+            points: 1 | 2 | 3;
+            isImportant: boolean;
+            isUrgent: boolean;
+        },
+        id?: string
+    ) => {
         try {
-            const res = await fetch('/api/tasks', {
+            if (id) {
+                await fetch(`/api/tasks/${id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data),
+                });
+            } else {
+                await fetch('/api/tasks', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ...data, date: today, type: 'regular', isCompleted: false }),
+                });
+            }
+            await load();
+        } catch (err) {
+            console.error('Failed to save task', err);
+        }
+    };
+
+    // Regular tasks are archived (endDate set) rather than hard-deleted, so
+    // history for already-completed days is preserved — same convention the
+    // day board and mobile screen use.
+    const deleteTask = async (task: MetricTask) => {
+        if (!window.confirm(`Remove "${task.title}"?`)) return;
+        try {
+            await fetch(`/api/tasks/${task._id}?date=${today}`, { method: 'DELETE' });
+            setTasks((prev) => prev.filter((t) => t._id !== task._id));
+        } catch (err) {
+            console.error('Failed to remove task', err);
+        }
+    };
+
+    const deleteCategory = async (pillar: Pillar) => {
+        if (!pillar.categoryId) return;
+        const count = pillar.tasks.length;
+        const warning = count > 0
+            ? `Remove "${pillar.name}"? Its ${count} task${count === 1 ? '' : 's'} will be archived too.`
+            : `Remove "${pillar.name}"?`;
+        if (!window.confirm(warning)) return;
+
+        try {
+            await fetch(`/api/categories/${pillar.categoryId}`, { method: 'DELETE' });
+            await load();
+        } catch (err) {
+            console.error('Failed to remove category', err);
+        }
+    };
+
+    const addCategory = async () => {
+        const name = newCategoryName.trim();
+        if (!name) return;
+        setSavingCategory(true);
+        try {
+            await fetch('/api/categories', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ...data, date: today, type: 'regular', isCompleted: false }),
+                body: JSON.stringify({ name }),
             });
-            if (res.ok) {
-                const saved: MetricTask = await res.json();
-                setTasks((prev) => [...prev, saved]);
-            }
+            setNewCategoryName('');
+            setAddingCategory(false);
+            await load();
         } catch (err) {
-            console.error('Failed to create task', err);
+            console.error('Failed to add category', err);
+        } finally {
+            setSavingCategory(false);
         }
     };
 
@@ -223,39 +333,105 @@ export default function ProfileBoard() {
                         These appear on your board every day.
                     </p>
 
-                    {pillars.length === 0 && <p className="m-empty">No recurring tasks yet.</p>}
+                    {pillars.length === 0 && <p className="m-empty">No categories yet.</p>}
 
                     {pillars.map((pillar) => (
                         <div style={{ marginBottom: 26 }} key={pillar.name}>
                             <div className="m-group-head">
                                 <span className="m-pillar">{pillar.name}</span>
-                                <button
-                                    className="m-btn m-btn-ghost"
-                                    style={{ fontSize: 12 }}
-                                    onClick={() => { setDefaultCategory(pillar.name); setTaskModalOpen(true); }}
-                                >
-                                    + Add task
-                                </button>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                                    <button
+                                        className="m-btn m-btn-ghost"
+                                        style={{ fontSize: 12 }}
+                                        onClick={() => openAddTask(pillar.name)}
+                                    >
+                                        + Add task
+                                    </button>
+                                    {pillar.categoryId && (
+                                        <button
+                                            className="m-btn m-btn-ghost"
+                                            style={{ padding: 6 }}
+                                            onClick={() => deleteCategory(pillar)}
+                                            aria-label={`Remove ${pillar.name} category`}
+                                            title="Remove category"
+                                        >
+                                            <Trash2 size={14} />
+                                        </button>
+                                    )}
+                                </div>
                             </div>
+                            {pillar.tasks.length === 0 && (
+                                <p className="m-empty" style={{ padding: '10px 0' }}>No tasks in this category yet.</p>
+                            )}
                             {pillar.tasks.map((task) => (
                                 <div className="m-listrow" key={task._id}>
                                     <span style={{ fontSize: 15 }}>{task.title}</span>
-                                    <span className="m-pts">{pointsOf(task)} PT</span>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                                        <span className="m-pts">{pointsOf(task)} PT</span>
+                                        <button
+                                            className="m-btn m-btn-ghost"
+                                            style={{ padding: 4 }}
+                                            onClick={() => openEditTask(task)}
+                                            aria-label={`Edit ${task.title}`}
+                                            title="Edit task"
+                                        >
+                                            <Pencil size={14} />
+                                        </button>
+                                        <button
+                                            className="m-btn m-btn-ghost"
+                                            style={{ padding: 4 }}
+                                            onClick={() => deleteTask(task)}
+                                            aria-label={`Remove ${task.title}`}
+                                            title="Remove task"
+                                        >
+                                            <Trash2 size={14} />
+                                        </button>
+                                    </div>
                                 </div>
                             ))}
                         </div>
                     ))}
 
-                    <button
-                        className="m-btn m-btn-secondary m-btn-block"
-                        onClick={() => { setDefaultCategory(undefined); setTaskModalOpen(true); }}
-                    >
-                        + Add category
-                    </button>
+                    {addingCategory ? (
+                        <div style={{ display: 'flex', gap: 8 }}>
+                            <input
+                                className="m-input"
+                                autoFocus
+                                placeholder="Category name"
+                                value={newCategoryName}
+                                onChange={(e) => setNewCategoryName(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') addCategory();
+                                    if (e.key === 'Escape') { setAddingCategory(false); setNewCategoryName(''); }
+                                }}
+                            />
+                            <button className="m-btn m-btn-primary" onClick={addCategory} disabled={savingCategory}>
+                                {savingCategory ? 'Adding…' : 'Add'}
+                            </button>
+                            <button
+                                className="m-btn m-btn-secondary"
+                                onClick={() => { setAddingCategory(false); setNewCategoryName(''); }}
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    ) : (
+                        <button
+                            className="m-btn m-btn-secondary m-btn-block"
+                            onClick={() => setAddingCategory(true)}
+                        >
+                            + Add category
+                        </button>
+                    )}
                 </div>
 
                 <div style={{ padding: '40px 0 40px 48px', borderLeft: '2px solid var(--m-divider)' }}>
-                    <h2 className="m-h2" style={{ marginBottom: 6 }}>Spontaneous tasks</h2>
+                    <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 6 }}>
+                        <h2 className="m-h2">Spontaneous tasks</h2>
+                        <button className="m-btn m-btn-ghost" onClick={() => setSpontaneousModalOpen(true)}>
+                            + Add spontaneous task
+                        </button>
+                    </div>
                     <p style={{ fontSize: 14, color: 'var(--m-neutral-600)', margin: '0 0 26px' }}>
                         One-offs for today, {format(new Date(), 'MMM d')}.
                     </p>
@@ -264,9 +440,29 @@ export default function ProfileBoard() {
                         {spontaneous.map((task) => (
                             <div className="m-listrow" key={task._id}>
                                 <span style={{ fontSize: 15 }}>{task.title}</span>
-                                <span className="m-pts">
-                                    {task.isUrgent ? 'URGENT' : task.isImportant ? 'IMPORTANT' : 'LATER'}
-                                </span>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                                    <span className="m-pts">
+                                        {task.isUrgent ? 'URGENT' : task.isImportant ? 'IMPORTANT' : 'LATER'}
+                                    </span>
+                                    <button
+                                        className="m-btn m-btn-ghost"
+                                        style={{ padding: 4 }}
+                                        onClick={() => openEditTask(task)}
+                                        aria-label={`Edit ${task.title}`}
+                                        title="Edit task"
+                                    >
+                                        <Pencil size={14} />
+                                    </button>
+                                    <button
+                                        className="m-btn m-btn-ghost"
+                                        style={{ padding: 4 }}
+                                        onClick={() => deleteTask(task)}
+                                        aria-label={`Remove ${task.title}`}
+                                        title="Remove task"
+                                    >
+                                        <Trash2 size={14} />
+                                    </button>
+                                </div>
                             </div>
                         ))}
                     </div>
@@ -281,9 +477,15 @@ export default function ProfileBoard() {
             />
             <AddTaskModal
                 isOpen={taskModalOpen}
-                onClose={() => setTaskModalOpen(false)}
-                onSave={addTask}
+                onClose={() => { setTaskModalOpen(false); setTaskToEdit(null); }}
+                onSave={saveTask}
                 defaultCategory={defaultCategory}
+                taskToEdit={taskToEdit}
+            />
+            <QuickAddSpontaneous
+                isOpen={spontaneousModalOpen}
+                onClose={() => setSpontaneousModalOpen(false)}
+                onCreated={(task) => setTasks((prev) => [...prev, task])}
             />
         </section>
     );

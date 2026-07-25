@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { addDays, subDays, format } from 'date-fns';
-import AddTaskModal from '../AddTaskModal';
+import QuickAddSpontaneous from './QuickAddSpontaneous';
 import {
     MetricTask,
     dayKey,
@@ -102,27 +102,11 @@ export default function DayBoard() {
         }
     };
 
-    const addTask = async (data: {
-        title: string;
-        category: string;
-        points: 1 | 2 | 3;
-        isImportant: boolean;
-        isUrgent: boolean;
-    }) => {
-        if (!key) return;
-        try {
-            const res = await fetch('/api/tasks', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ...data, date: key, isCompleted: false }),
-            });
-            if (res.ok) {
-                const saved: MetricTask = await res.json();
-                setTasks((prev) => [...prev, saved]);
-            }
-        } catch (err) {
-            console.error('Failed to create task', err);
-        }
+    // Spontaneous tasks are always dated to the real today, independent of
+    // whichever day this board is currently showing — so this only shows up
+    // in the list here when the viewed day is today.
+    const handleSpontaneousCreated = (task: MetricTask) => {
+        setTasks((prev) => [...prev, task]);
     };
 
     const saveEntry = async () => {
@@ -188,7 +172,11 @@ export default function DayBoard() {
                 </div>
             </div>
 
-            <AddTaskModal isOpen={modalOpen} onClose={() => setModalOpen(false)} onSave={addTask} />
+            <QuickAddSpontaneous
+                isOpen={modalOpen}
+                onClose={() => setModalOpen(false)}
+                onCreated={handleSpontaneousCreated}
+            />
 
             <div className="m-split">
                 <div className="m-split-left">

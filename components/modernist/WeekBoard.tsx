@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { startOfWeek, addDays, subDays, format } from 'date-fns';
-import AddTaskModal from '../AddTaskModal';
+import QuickAddSpontaneous from './QuickAddSpontaneous';
 import {
     MetricTask,
     dayKey,
@@ -12,7 +12,6 @@ import {
     groupByCategory,
     isActiveOn,
     isDoneOn,
-    pointsOf,
 } from '@/lib/metrics';
 
 // Streak needs history the visible week doesn't contain, so the fetch window
@@ -65,11 +64,20 @@ export default function WeekBoard({ initialTasks = [] }: Props) {
         if (weekStart) fetchTasks();
     }, [fetchTasks, weekStart]);
 
+    // Spontaneous tasks have no pillar, so they're grouped separately below —
+    // only regular tasks feed the category rows.
     const pillars = useMemo(() => {
         if (!weekDays.length) return [];
-        // Only tasks that touch the visible week belong on the grid.
-        const visible = tasks.filter((t) => weekDays.some((d) => isActiveOn(t, dayKey(d))));
+        const visible = tasks.filter(
+            (t) => t.type === 'regular' && weekDays.some((d) => isActiveOn(t, dayKey(d)))
+        );
         return groupByCategory(visible);
+    }, [tasks, weekDays]);
+
+    const weekSpontaneous = useMemo(() => {
+        if (!weekDays.length) return [];
+        const days = new Set(weekDays.map(dayKey));
+        return tasks.filter((t) => t.type === 'spontaneous' && days.has(t.date));
     }, [tasks, weekDays]);
 
     const totals = useMemo(
@@ -115,29 +123,8 @@ export default function WeekBoard({ initialTasks = [] }: Props) {
         }
     };
 
-    const addTask = async (data: {
-        title: string;
-        category: string;
-        points: 1 | 2 | 3;
-        isImportant: boolean;
-        isUrgent: boolean;
-    }) => {
-        const todayInView = weekDays.some((d) => dayKey(d) === today);
-        const date = todayInView ? today : dayKey(weekDays[0]);
-
-        try {
-            const res = await fetch('/api/tasks', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ...data, date, isCompleted: false }),
-            });
-            if (res.ok) {
-                const saved: MetricTask = await res.json();
-                setTasks((prev) => [...prev, saved]);
-            }
-        } catch (err) {
-            console.error('Failed to create task', err);
-        }
+    const handleSpontaneousCreated = (task: MetricTask) => {
+        setTasks((prev) => [...prev, task]);
     };
 
     if (!anchor || !summary) {
@@ -166,7 +153,11 @@ export default function WeekBoard({ initialTasks = [] }: Props) {
                 </div>
             </div>
 
-            <AddTaskModal isOpen={modalOpen} onClose={() => setModalOpen(false)} onSave={addTask} />
+            <QuickAddSpontaneous
+                isOpen={modalOpen}
+                onClose={() => setModalOpen(false)}
+                onCreated={handleSpontaneousCreated}
+            />
 
             <div className="m-stats">
                 <div className="m-stat">
@@ -210,7 +201,7 @@ export default function WeekBoard({ initialTasks = [] }: Props) {
                 <div className="m-label" style={{ textAlign: 'right' }}>Done</div>
             </div>
 
-            {pillars.length === 0 && !loading && (
+            {pillars.length === 0 && weekSpontaneous.length === 0 && !loading && (
                 <p className="m-empty">No tasks this week yet. Add one to start the grid.</p>
             )}
 
@@ -271,7 +262,44 @@ export default function WeekBoard({ initialTasks = [] }: Props) {
                 </div>
             ))}
 
-            {pillars.length > 0 && (
+            {weekSpontaneous.length > 0 && (
+                <div>
+                    <div className="m-wgrid" style={{ padding: '20px 0 10px' }}>
+                        <div className="m-pillar">SPONTANEOUS</div>
+                        <div className="m-pillar-rule" />
+                    </div>
+
+                    {weekSpontaneous.map((task) => (
+                        <div className="m-wgrid" style={{ padding: '7px 0' }} key={task._id}>
+                            <div className="m-taskname" title={task.title}>{task.title}</div>
+                            {weekDays.map((day) => {
+                                const date = dayKey(day);
+                                if (date !== task.date) {
+                                    return <div className="m-cellwrap" key={date} />;
+                                }
+                                const done = isDoneOn(task, date);
+                                return (
+                                    <div className="m-cellwrap" key={date}>
+                                        <button
+                                            className="m-cell"
+                                            onClick={() => toggle(task, date)}
+                                            aria-label={`${task.title} on ${date}`}
+                                            aria-pressed={done}
+                                        >
+                                            <span className={`m-cell-mark ${done ? 'm-cell-done' : 'm-cell-todo'}`} />
+                                        </button>
+                                    </div>
+                                );
+                            })}
+                            <div className="m-score" style={{ color: isDoneOn(task, task.date) ? 'var(--m-accent)' : 'var(--m-neutral-400)' }}>
+                                {isDoneOn(task, task.date) ? '1/1' : '0/1'}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            {(pillars.length > 0 || weekSpontaneous.length > 0) && (
                 <div className="m-wgrid m-total-row">
                     <div className="m-pillar" style={{ color: 'var(--m-text)' }}>Day total</div>
                     {totals.map((t) => (

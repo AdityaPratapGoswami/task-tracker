@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Zap } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import GoogleAuthButton from './GoogleAuthButton';
+import Logo from './Logo';
 
 export default function LoginBoard() {
     const [email, setEmail] = useState('');
@@ -50,20 +50,7 @@ export default function LoginBoard() {
                 }}
             >
                 <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 24 }}>
-                    <div
-                        style={{
-                            width: 56,
-                            height: 56,
-                            borderRadius: 14,
-                            background: '#1a1a1a',
-                            color: '#fff',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                        }}
-                    >
-                        <Zap size={26} fill="currentColor" />
-                    </div>
+                    <Logo size={56} />
                 </div>
 
                 <h1

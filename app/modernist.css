@@ -25,6 +25,23 @@
   --m-body: var(--font-archivo), "Archivo", system-ui, sans-serif;
 }
 
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --m-bg: #1c1a19;
+  --m-surface: #262322;
+  --m-text: #f2f0ef;
+  --m-divider: color-mix(in srgb, #f2f0ef 35%, transparent);
+
+  --m-neutral-300: #3a3735;
+  --m-neutral-400: #4d4a47;
+  --m-neutral-500: #948f8c;
+  --m-neutral-600: #b3aead;
+
+  --m-accent-600: #ff4b2c;
+  --m-accent-700: #ff6b4a;
+}
+
 /* Base document styling now lives in globals.css — this only adds the bottom
    breathing room the boards need below their last row. */
 .m-page {

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSyncExternalStore } from 'react';
 import { format, getISOWeek } from 'date-fns';
+import Logo from './Logo';
 
 // The clock never pushes updates, so there's nothing to subscribe to — this
 // only exists to give useSyncExternalStore a snapshot that's null on the
@@ -38,6 +39,7 @@ export default function ModernistHeader() {
     return (
         <header className="m-header">
             <div className="m-brandwrap">
+                <Logo variant="mark" size={22} />
                 <span className="m-brand">BALANCE</span>
                 <span className="m-kicker">{stamp}</span>
             </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { Zap } from 'lucide-react';
+import Logo from './modernist/Logo';
 
 /**
  * Shared loading state for every route.
@@ -29,20 +29,8 @@ export default function AppLoader() {
                 zIndex: 100,
             }}
         >
-            <div
-                style={{
-                    width: 72,
-                    height: 72,
-                    borderRadius: 16,
-                    background: '#1a1a1a',
-                    color: '#fff',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    animation: 'app-loader-pulse 1.1s ease-in-out infinite',
-                }}
-            >
-                <Zap size={34} fill="currentColor" />
+            <div style={{ animation: 'app-loader-pulse 1.1s ease-in-out infinite' }}>
+                <Logo size={72} />
             </div>
             <style>{`
                 @keyframes app-loader-pulse {

@@ -1,6 +1,6 @@
 'use client';
 
-import { Zap } from 'lucide-react';
+import Logo from './Logo';
 
 /**
  * Shown below the desktop breakpoint.
@@ -26,20 +26,7 @@ export default function NarrowScreenNotice() {
                 color: 'var(--m-text)',
             }}
         >
-            <div
-                style={{
-                    width: 56,
-                    height: 56,
-                    borderRadius: 14,
-                    background: '#1a1a1a',
-                    color: '#fff',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                }}
-            >
-                <Zap size={26} fill="currentColor" />
-            </div>
+            <Logo size={56} />
 
             <div>
                 <div className="m-brand" style={{ fontSize: 21, marginBottom: 12 }}>BALANCE</div>

@@ -8,6 +8,7 @@ import AddTaskDialog from './AddTaskDialog';
 import QuickAddSpontaneous from './QuickAddSpontaneous';
 import ConfirmDialog from './ConfirmDialog';
 import { useAuth } from '@/context/AuthContext';
+import { useTheme } from '@/lib/useTheme';
 import { IOKR } from '@/types/okr';
 import { MetricTask, dayKey, isActiveOn, pointsOf } from '@/lib/metrics';
 import type { ProfileData } from '@/lib/serverData';
@@ -37,6 +38,7 @@ function quarterInfo(date: Date) {
 
 export default function ProfileBoard({ initialData }: Props) {
     const { user, logout } = useAuth();
+    const { theme, setTheme } = useTheme();
     const [name, setName] = useState(initialData?.name ?? '');
     const [savingName, setSavingName] = useState(false);
     const [okrs, setOkrs] = useState<IOKR[]>(initialData?.okrs ?? []);
@@ -286,6 +288,26 @@ export default function ProfileBoard({ initialData }: Props) {
                 <div style={{ padding: '32px 0 32px 32px', borderLeft: '2px solid var(--m-divider)' }}>
                     <label className="m-label" htmlFor="m-email" style={{ marginBottom: 10 }}>Email</label>
                     <input id="m-email" className="m-input" value={user?.email ?? ''} readOnly />
+                </div>
+            </div>
+
+            <div style={{ borderTop: '2px solid var(--m-divider)', padding: '32px 0' }}>
+                <label className="m-label" style={{ marginBottom: 10 }}>Appearance</label>
+                <div style={{ display: 'flex', gap: 8 }}>
+                    <button
+                        type="button"
+                        className={`m-btn ${theme === 'light' ? 'm-btn-primary' : 'm-btn-secondary'}`}
+                        onClick={() => setTheme('light')}
+                    >
+                        Light
+                    </button>
+                    <button
+                        type="button"
+                        className={`m-btn ${theme === 'dark' ? 'm-btn-primary' : 'm-btn-secondary'}`}
+                        onClick={() => setTheme('dark')}
+                    >
+                        Dark
+                    </button>
                 </div>
             </div>
 

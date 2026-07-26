@@ -4,6 +4,7 @@ import "./globals.css";
 import "./modernist.css";
 import { AuthProvider } from "@/context/AuthContext";
 import AppLayout from "@/components/AppLayout";
+import { THEME_INIT_SCRIPT } from "@/lib/useTheme";
 
 // Archivo drives the whole design system. Only the three weights actually used
 // are requested, so this stays one small file rather than the full family.
@@ -28,8 +29,9 @@ export default function RootLayout({
   // it. On <body> it would be invalid at :root scope, which silently blanks
   // any token built from it.
   return (
-    <html lang="en" className={archivo.variable}>
+    <html lang="en" className={archivo.variable} suppressHydrationWarning>
       <body suppressHydrationWarning>
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <AuthProvider>
           <AppLayout>{children}</AppLayout>
         </AuthProvider>

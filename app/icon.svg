@@ -1,6 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
-  <rect x="0" y="0" width="48" height="48" rx="12" fill="#111827"/>
-  <svg x="12" y="12" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+  <rect x="0" y="0" width="48" height="48" fill="#ffffff"/>
+  <svg x="7" y="7" width="34" height="34" viewBox="0 0 48 48">
+    <rect x="0" y="36" width="8" height="12" fill="#201e1d"/>
+    <rect x="13" y="24" width="8" height="24" fill="#201e1d"/>
+    <rect x="26" y="12" width="8" height="36" fill="#201e1d"/>
+    <rect x="39" y="0" width="8" height="48" fill="#ec3013"/>
   </svg>
 </svg>

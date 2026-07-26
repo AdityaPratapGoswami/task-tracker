@@ -1,5 +1,5 @@
 import { startOfWeek, addDays, subDays } from 'date-fns';
-import AnalyticsScreen from '@/components/modernist/AnalyticsScreen';
+import AnalyticsBoard from '@/components/modernist/AnalyticsBoard';
 import { getSessionUserId, loadTasksInRange } from '@/lib/serverData';
 import { dayKey } from '@/lib/metrics';
 
@@ -18,5 +18,5 @@ export default async function AnalyticsPage() {
         )
         : undefined;
 
-    return <AnalyticsScreen initialDate={dayKey(now)} initialTasks={initialTasks} />;
+    return <AnalyticsBoard initialDate={dayKey(now)} initialTasks={initialTasks} />;
 }

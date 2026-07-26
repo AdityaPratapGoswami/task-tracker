@@ -1,29 +1,30 @@
 "use client";
 
 import { usePathname } from 'next/navigation';
-import NavBar from './NavBar';
 import ModernistHeader from './modernist/ModernistHeader';
+import NarrowScreenNotice from './modernist/NarrowScreenNotice';
+import AppLoader from './AppLoader';
 import useIsDesktop from '@/lib/useIsDesktop';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
     const isDesktop = useIsDesktop();
 
-    // Auth pages where we never want to show the NavBar
+    // Login and signup are full-bleed and carry no navigation.
     const isAuthPage = pathname === '/login' || pathname === '/signup';
 
-    // `isDesktop` is null until the client mounts. Rendering no chrome for that
-    // first paint is better than rendering the wrong one and swapping it.
-    const chrome = isAuthPage || isDesktop === null
-        ? null
-        : isDesktop ? <ModernistHeader /> : <NavBar />;
+    // Null while server-rendering and hydrating; matchMedia resolves
+    // synchronously on the client, so this doesn't flash on navigation.
+    if (isDesktop === null) return <AppLoader />;
+
+    // The app is laptop-only by design, so narrow viewports get told that
+    // rather than a squeezed version of a seven-column grid.
+    if (!isDesktop) return <NarrowScreenNotice />;
 
     return (
         <>
-            {chrome}
-            {/* `m-page` both applies the Modernist surface and is the hook the
-                stylesheet uses to switch the body off the legacy gradient. */}
-            <main className={isDesktop && !isAuthPage ? 'm-page' : undefined} style={{ minHeight: '100vh' }}>
+            {!isAuthPage && <ModernistHeader />}
+            <main className={isAuthPage ? undefined : 'm-page'} style={{ minHeight: '100vh' }}>
                 {children}
             </main>
         </>

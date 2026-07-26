@@ -17,15 +17,12 @@ export function proxy(request: NextRequest) {
         return NextResponse.next();
     }
 
-    // Allow static files and valid public API routes
+    // Allow static files through without a session
     if (
         pathname.startsWith('/_next') ||
         pathname.startsWith('/static') ||
         pathname.startsWith('/favicon.ico') ||
-        pathname === '/manifest.json' ||
-        pathname === '/icon.png' ||
-        pathname.startsWith('/sw.js') ||
-        pathname.startsWith('/workbox-')
+        pathname === '/icon.svg'
     ) {
         return NextResponse.next();
     }

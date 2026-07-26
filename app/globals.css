@@ -1,79 +1,35 @@
-:root {
-  --color-grey-50: #F9FAFB;
-  --color-grey-100: #F3F4F6;
-  --color-grey-200: #E5E7EB;
-  --color-grey-300: #D1D5DB;
-  --color-grey-400: #9CA3AF;
-  --color-grey-500: #6B7280;
-  --color-grey-600: #4B5563;
-  --color-grey-700: #374151;
-  --color-grey-800: #1F2937;
-  --color-grey-900: #111827;
+/*
+ * Base reset and document styling.
+ *
+ * The design system itself lives in modernist.css, which owns the tokens and
+ * every component class. This file only handles the document-level defaults
+ * that sit underneath it.
+ */
 
-  --color-primary-400: #A78BFA;
-  --color-primary-600: #7C3AED;
-
-  --color-success: #10B981;
-  /* Green for check */
-  --color-danger: #EF4444;
-  /* Red for delete */
-
-  --color-bg-grid: #FFFFFF;
-  --color-text-main: var(--color-grey-900);
-  --color-text-muted: var(--color-grey-500);
-  --color-white: #FFFFFF;
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --radius-md: 0.5rem;
-  --radius-lg: 0.75rem;
-  /* Typography System */
-  --font-size-2xl: 32px;
-  --font-size-xl: 20px;
-  --font-size-base: 16px;
-  --font-size-sm: 13px;
-  --font-size-xs: 12px;
-
-  --font-weight-bold: 700;
-  --font-weight-semibold: 600;
-  --font-weight-regular: 400;
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
 * {
-  box-sizing: border-box;
-  padding: 0;
   margin: 0;
+  padding: 0;
+}
+
+html {
+  color-scheme: light;
 }
 
 body {
-  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-
-  /* Global App Background */
-  background-color: #f3f4f6;
-  background-image:
-    radial-gradient(at 80% 0%, hsla(189, 100%, 56%, 0.3) 0px, transparent 50%),
-    radial-gradient(at 0% 50%, hsla(355, 100%, 93%, 1) 0px, transparent 50%),
-    radial-gradient(at 80% 50%, hsla(340, 100%, 76%, 0.3) 0px, transparent 50%),
-    radial-gradient(at 0% 100%, hsla(22, 100%, 77%, 0.3) 0px, transparent 50%),
-    radial-gradient(at 80% 100%, hsla(242, 100%, 70%, 0.3) 0px, transparent 50%),
-    radial-gradient(at 0% 0%, hsla(343, 100%, 76%, 0.3) 0px, transparent 50%);
-  background-attachment: fixed;
-  background-size: cover;
+  background: var(--m-bg);
+  color: var(--m-text);
+  font-family: var(--m-body);
+  font-size: 15px;
+  line-height: 1.55;
   min-height: 100vh;
-
-  color: var(--color-text-main);
-  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  padding-top: 4rem;
-}
-
-@media (max-width: 640px) {
-  body {
-    padding-top: 1rem;
-    /* Less top padding since navbar is at bottom */
-    padding-bottom: 5rem;
-    /* Space for bottom navbar */
-  }
 }
 
 a {
@@ -81,155 +37,7 @@ a {
   text-decoration: none;
 }
 
-/* Utilities */
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem;
-}
-
-.grid-week {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  /* align-items: start; -> moved to media query */
-}
-
-@media (min-width: 1024px) {
-  .grid-week {
-    flex-direction: row;
-    align-items: start;
-    /* grid-template-columns: repeat(3, 1fr); -> removed */
-  }
-}
-
-.card {
-  background: var(--color-white);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-  padding: 1rem;
-  transition: box-shadow 0.2s ease;
-}
-
-.card:hover {
-  box-shadow: var(--shadow-md);
-}
-
-/* Glassmorphic Button */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: 2.5rem;
-  padding: 0 1.25rem;
-  border-radius: 9999px;
-  /* Pill shape */
-  font-weight: 600;
-  font-size: 0.95rem;
-  line-height: 1;
-  cursor: pointer;
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  background: rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  color: var(--color-grey-800);
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.btn:hover {
-  background: rgba(255, 255, 255, 0.45);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.08);
-}
-
-.btn:active {
-  transform: translateY(0);
-  background: rgba(255, 255, 255, 0.35);
-}
-
-.btn-icon {
-  padding: 0.25rem;
-  background: transparent;
-}
-
-.text-bold {
-  font-weight: 600;
-}
-
-.text-muted {
-  color: var(--color-text-muted);
-}
-
-.flex {
-  display: flex;
-}
-
-.flex-col {
-  flex-direction: column;
-}
-
-.items-center {
-  align-items: center;
-}
-
-.justify-between {
-  justify-content: space-between;
-}
-
-.gap-2 {
-  gap: 0.5rem;
-}
-
-.gap-4 {
-  gap: 1rem;
-}
-
-.mt-4 {
-  margin-top: 1rem;
-}
-
-.mb-2 {
-  margin-bottom: 0.5rem;
-}
-
-/* Typography Utilities */
-.text-title {
-  font-size: var(--font-size-2xl);
-  /* 32px */
-  font-weight: var(--font-weight-bold);
-  /* 700 */
-  letter-spacing: -0.02em;
-}
-
-.text-heading {
-  font-size: var(--font-size-xl);
-  /* 20px */
-  font-weight: var(--font-weight-semibold);
-  /* 600 */
-  letter-spacing: -0.01em;
-}
-
-.text-body {
-  font-size: var(--font-size-base);
-  /* 16px */
-  font-weight: var(--font-weight-regular);
-  /* 400 */
-}
-
-.text-meta {
-  font-size: var(--font-size-sm);
-  /* 13px */
-  font-weight: var(--font-weight-regular);
-  /* 400 */
-  opacity: 0.7;
-  /* Reduced opacity */
-}
-
-.text-caption {
-  font-size: var(--font-size-xs);
-  /* 12px */
-  font-weight: var(--font-weight-regular);
-  /* 400 */
-  opacity: 0.6;
+button {
+  font: inherit;
+  color: inherit;
 }

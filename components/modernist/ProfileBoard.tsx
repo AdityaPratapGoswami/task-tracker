@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { format, differenceInCalendarDays } from 'date-fns';
 import { Pencil, Trash2 } from 'lucide-react';
-import AddOKRModal from '../AddOKRModal';
+import OKRDialog from './OKRDialog';
 import AddTaskDialog from './AddTaskDialog';
 import QuickAddSpontaneous from './QuickAddSpontaneous';
 import ConfirmDialog from './ConfirmDialog';
@@ -503,7 +503,7 @@ export default function ProfileBoard({ initialData }: Props) {
                 </div>
             </div>
 
-            <AddOKRModal
+            <OKRDialog
                 isOpen={okrModalOpen}
                 onClose={() => { setOkrModalOpen(false); setOkrToEdit(null); }}
                 onSave={saveOkr}

@@ -1,10 +1,9 @@
 /*
- * Modernist — the desktop design system.
+ * Modernist — the design system.
  *
- * Tokens are global (none of these names collide with the legacy mobile
- * variables in globals.css), but every rule that paints is namespaced `m-`
- * or scoped to the >=1024px breakpoint, so the existing mobile UI is
- * untouched by this file.
+ * Owns the tokens and every component class. Class names keep the `m-` prefix
+ * from when this coexisted with an older stylesheet; that one is gone, but the
+ * prefix stays because renaming every call site would be churn for no gain.
  */
 
 :root {
@@ -26,37 +25,10 @@
   --m-body: var(--font-archivo), "Archivo", system-ui, sans-serif;
 }
 
-/*
- * The legacy mobile theme paints six fixed radial gradients over the whole
- * page. `background-attachment: fixed` forces a full-viewport repaint on
- * every scroll frame, which is the single most expensive thing on the page.
- * Desktop drops it for a flat fill.
- */
-@media (min-width: 1024px) {
-  body:has(.m-page) {
-    background-image: none;
-    background-color: var(--m-bg);
-    background-attachment: scroll;
-    color: var(--m-text);
-    font-family: var(--m-body);
-    padding-top: 0;
-  }
-}
-
+/* Base document styling now lives in globals.css — this only adds the bottom
+   breathing room the boards need below their last row. */
 .m-page {
-  min-height: 100vh;
-  background: var(--m-bg);
-  color: var(--m-text);
-  font-family: var(--m-body);
-  font-size: 15px;
-  line-height: 1.55;
   padding-bottom: 96px;
-}
-
-.m-page *,
-.m-page *::before,
-.m-page *::after {
-  box-sizing: border-box;
 }
 
 .m-shell {

@@ -29,20 +29,31 @@ export default function OKRDialog({ isOpen, onClose, onSave, okrToEdit }: Props)
     const [keyResults, setKeyResults] = useState<{ title: string; completed: boolean }[]>([]);
     const objectiveRef = useRef<HTMLInputElement>(null);
 
+    // Re-seeds the fields whenever the dialog opens (for a possibly different
+    // OKR). Done during render rather than in an effect, per
+    // https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
+    // — an effect here would commit the stale/empty fields for one frame
+    // before resetting them.
+    const openKey = isOpen ? okrToEdit?._id ?? 'new' : null;
+    const [prevOpenKey, setPrevOpenKey] = useState<string | null>(null);
+    if (openKey !== prevOpenKey) {
+        setPrevOpenKey(openKey);
+        if (openKey) {
+            if (okrToEdit) {
+                setObjective(okrToEdit.objective);
+                setKeyResults(okrToEdit.keyResults.map((kr) => ({ title: kr.title, completed: kr.completed })));
+            } else {
+                setObjective('');
+                setKeyResults([{ title: '', completed: false }]);
+            }
+        }
+    }
+
     useEffect(() => {
         if (!isOpen) return;
-
-        if (okrToEdit) {
-            setObjective(okrToEdit.objective);
-            setKeyResults(okrToEdit.keyResults.map((kr) => ({ title: kr.title, completed: kr.completed })));
-        } else {
-            setObjective('');
-            setKeyResults([{ title: '', completed: false }]);
-        }
-
         const id = setTimeout(() => objectiveRef.current?.focus(), 0);
         return () => clearTimeout(id);
-    }, [isOpen, okrToEdit]);
+    }, [isOpen]);
 
     useEffect(() => {
         if (!isOpen) return;

@@ -9,11 +9,22 @@ interface User {
     email: string;
 }
 
+interface LoginCredentials {
+    email: string;
+    password: string;
+}
+
+interface SignupCredentials {
+    name: string;
+    email: string;
+    password: string;
+}
+
 interface AuthContextType {
     user: User | null;
     loading: boolean;
-    login: (credentials: any) => Promise<void>;
-    signup: (credentials: any) => Promise<void>;
+    login: (credentials: LoginCredentials) => Promise<void>;
+    signup: (credentials: SignupCredentials) => Promise<void>;
     logout: () => Promise<void>;
 }
 
@@ -50,7 +61,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
     }
 
-    async function login(credentials: any) {
+    async function login(credentials: LoginCredentials) {
         const res = await fetch('/api/auth/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -64,7 +75,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         router.push('/');
     }
 
-    async function signup(credentials: any) {
+    async function signup(credentials: SignupCredentials) {
         const res = await fetch('/api/auth/signup', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

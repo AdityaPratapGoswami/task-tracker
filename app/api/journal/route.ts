@@ -77,8 +77,9 @@ export async function POST(request: Request) {
         );
 
         return NextResponse.json(journal);
-    } catch (error: any) {
+    } catch (error) {
         console.error('Actual error:', error);
-        return NextResponse.json({ error: `Failed to save journal: ${error.message}` }, { status: 500 });
+        const message = error instanceof Error ? error.message : 'Unknown error';
+        return NextResponse.json({ error: `Failed to save journal: ${message}` }, { status: 500 });
     }
 }

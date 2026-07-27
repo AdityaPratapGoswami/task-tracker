@@ -41,7 +41,7 @@ const OKRSchema: Schema = new Schema(
     }
 );
 
-function arrayLimit(val: any[]) {
+function arrayLimit(val: unknown[]) {
     return val.length <= 5;
 }
 

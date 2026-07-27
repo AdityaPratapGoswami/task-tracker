@@ -14,9 +14,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     const isAuthPage = pathname === '/login' || pathname === '/signup';
 
     // Static legal/info pages need to render on the server and on any device
-    // — Google's OAuth branding verification fetches this without running
+    // — Google's OAuth branding verification fetches these without running
     // client JS, and a "laptop-only" gate would show it nothing.
-    if (pathname === '/privacy') return <>{children}</>;
+    if (pathname === '/privacy' || pathname === '/about') return <>{children}</>;
 
     // Null while server-rendering and hydrating; matchMedia resolves
     // synchronously on the client, so this doesn't flash on navigation.

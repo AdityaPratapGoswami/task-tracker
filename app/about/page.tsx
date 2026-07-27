@@ -36,13 +36,18 @@ export default function AboutPage() {
             <section style={{ marginBottom: 40 }}>
                 <h2 className="m-h2" style={{ marginBottom: 12 }}>Getting started</h2>
                 <p style={{ marginBottom: 20 }}>
-                    Sign in to start tracking your own pillars, or read how your data is handled in the{' '}
-                    <Link href="/privacy" style={{ color: 'var(--m-accent)' }}>privacy policy</Link>.
+                    Sign in to start tracking your own pillars.
                 </p>
                 <Link href="/login" className="m-btn m-btn-primary" style={{ display: 'inline-flex' }}>
                     Sign in
                 </Link>
             </section>
+
+            <footer style={{ borderTop: '2px solid var(--m-divider)', paddingTop: 20 }}>
+                <Link href="/privacy" className="m-btn m-btn-secondary" style={{ display: 'inline-flex' }}>
+                    Privacy Policy
+                </Link>
+            </footer>
         </div>
     );
 }

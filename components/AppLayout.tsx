@@ -13,6 +13,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     // Login and signup are full-bleed and carry no navigation.
     const isAuthPage = pathname === '/login' || pathname === '/signup';
 
+    // Static legal/info pages need to render on the server and on any device
+    // — Google's OAuth branding verification fetches this without running
+    // client JS, and a "laptop-only" gate would show it nothing.
+    if (pathname === '/privacy') return <>{children}</>;
+
     // Null while server-rendering and hydrating; matchMedia resolves
     // synchronously on the client, so this doesn't flash on navigation.
     if (isDesktop === null) return <AppLoader />;

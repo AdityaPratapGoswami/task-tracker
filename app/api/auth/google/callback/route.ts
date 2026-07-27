@@ -20,7 +20,10 @@ export async function GET(req: Request) {
     try {
         const clientId = process.env.GOOGLE_CLIENT_ID;
         const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-        const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/google/callback`;
+        // Must match the redirect_uri sent to /api/auth/google exactly —
+        // see the comment there about the trailing-slash mismatch.
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '');
+        const redirectUri = `${appUrl}/api/auth/google/callback`;
 
         if (!clientId || !clientSecret) {
             return NextResponse.json({ error: 'Google credentials missing' }, { status: 500 });
@@ -48,7 +51,6 @@ export async function GET(req: Request) {
         }
 
         const accessToken = tokenData.access_token;
-        const idToken = tokenData.id_token; // We might not need this if we use the verify endpoint or userinfo
 
         // Fetch user info from Google
         const userResponse = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {

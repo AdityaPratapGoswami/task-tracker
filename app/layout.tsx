@@ -18,6 +18,9 @@ const archivo = Archivo({
 export const metadata: Metadata = {
   title: "Balance",
   description: "Organize your life with Balance",
+  verification: {
+    google: "c0Zs07oZnA-gkEBfKNFhBjm2HO4nX4ek-o5_DR8c3zE",
+  },
 };
 
 export default function RootLayout({

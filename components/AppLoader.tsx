@@ -29,13 +29,16 @@ export default function AppLoader() {
                 zIndex: 100,
             }}
         >
-            <div style={{ animation: 'app-loader-pulse 1.1s ease-in-out infinite' }}>
-                <Logo size={72} />
-            </div>
+            <Logo size={72} animated />
             <style>{`
-                @keyframes app-loader-pulse {
-                    0%, 100% { transform: scale(1); opacity: 1; }
-                    50% { transform: scale(0.82); opacity: 0.5; }
+                .m-pillar-bar {
+                    transform-box: fill-box;
+                    transform-origin: bottom;
+                    animation: m-pillar-rise 1.1s ease-in-out infinite;
+                }
+                @keyframes m-pillar-rise {
+                    0%, 100% { transform: scaleY(0); opacity: 0.4; }
+                    40%, 80% { transform: scaleY(1); opacity: 1; }
                 }
             `}</style>
         </div>
